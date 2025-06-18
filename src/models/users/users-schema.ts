@@ -27,6 +27,13 @@ const userSchema = new mongoose.Schema({
       trim: true,
       lowercase: true,
     },
+    fcmToken: {
+      type: String,
+      required: false,
+    },
+    countryCode: {
+      type: String,
+    },
     phoneNumber: {
       type: String,
       required: true,
@@ -44,7 +51,19 @@ const userSchema = new mongoose.Schema({
     password:{
       type: String,
       require:true
-    }
+    },
+    totalPoints: {
+      type: Number,
+      default: 0
+    },
+    redeemedPoints: {
+      type: Number,
+      default: 0
+    },
+    activePoints: {
+      type: Number,
+      default: 0
+    },
   },
   { timestamps: true }
 );

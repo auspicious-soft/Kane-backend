@@ -13,7 +13,6 @@ import jwt from "jsonwebtoken";
  
 export const loginService = async (payload: any, res: Response) => {
   const { email, password } = payload;
-  console.log('email, password: ', email, password);
   let user: any = null;
   let userType: 'admin' | 'user' | null = null;
 
@@ -126,7 +125,6 @@ export const forgotPasswordService = async (email: string, res: Response) => {
     }
 
   const passwordResetToken = await generatePasswordResetToken(email, null);
-  console.log("passwordResetToken: ", passwordResetToken);
   if (passwordResetToken !== null) {
     await sendPasswordResetEmail(email, passwordResetToken.token);
     return { success: true, message: "Password reset email sent with otp" };
