@@ -2,7 +2,9 @@ import { Request, Response } from "express"
 import { loginService, newPassswordAfterOTPVerifiedService, forgotPasswordService,
       getAdminDetailsService,
      verifyOtpPasswordResetService,
-     signupService} from "../../services/auth/auth-service";
+     signupService,
+     verifyOtpSignupService,
+     resendOtpService} from "../../services/auth/auth-service";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 
@@ -72,6 +74,30 @@ export const verifyOtpPasswordReset = async (req: Request, res: Response) => {
     const { otp } = req.body;
     try {
       const response = await verifyOtpPasswordResetService(otp, res);
+      return res.status(httpStatusCode.OK).json(response);
+    } catch (error: any) {
+      const { code, message } = errorParser(error);
+      return res
+        .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ success: false, message: message || "An error occurred" });
+    }
+  };
+export const verifyOtpSignup = async (req: Request, res: Response) => {
+    const { otp } = req.body;
+    try {
+      const response = await verifyOtpSignupService(otp, res);
+      return res.status(httpStatusCode.OK).json(response);
+    } catch (error: any) {
+      const { code, message } = errorParser(error);
+      return res
+        .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ success: false, message: message || "An error occurred" });
+    }
+  };
+export const resendOtp = async (req: Request, res: Response) => {
+    const { email } = req.body;
+    try {
+      const response = await resendOtpService(email, res);
       return res.status(httpStatusCode.OK).json(response);
     } catch (error: any) {
       const { code, message } = errorParser(error);

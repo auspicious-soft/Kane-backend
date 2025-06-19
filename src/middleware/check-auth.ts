@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { configDotenv } from "dotenv";
 import { decode } from 'next-auth/jwt'
 import { httpStatusCode } from "../lib/constant";
+import { usersModel } from "../models/users/users-schema";
 // import { usersModel } from "src/models/user/user-schema";
 configDotenv()
 declare global {
@@ -26,27 +27,17 @@ export const checkWebAuth = async (req: Request, res: Response, next: NextFuncti
         return res.status(httpStatusCode.UNAUTHORIZED).json({ success: false, message: "Unauthorized" })
     }
 }
+
+
+
 export const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const token = req.headers.authorization?.split(" ")[1] || req.cookies.token
         if (!token) return res.status(httpStatusCode.UNAUTHORIZED).json({ success: false, message: "Unauthorized token missing" })
- 
-        const isMobileApp = req.headers['x-client-type'] === 'mobile'
- 
-        if (isMobileApp) {
             const decoded = jwt.verify(token, process.env.AUTH_SECRET as string)
+            console.log('decoded: ', decoded);
             if (!decoded) return res.status(httpStatusCode.UNAUTHORIZED).json({ success: false, message: "Unauthorized token invalid or expired" })
             req.user = decoded
-        }
-        else {
-            const decoded = await decode({
-                secret: process.env.AUTH_SECRET as string,
-                token,
-                salt: process.env.JWT_SALT as string
-            })
-            if (!decoded) return res.status(httpStatusCode.UNAUTHORIZED).json({ success: false, message: "Unauthorized token invalid or expired" });
-                (req as any).currentUser = decoded.id
-            }
  
         next()
     } catch (error) {

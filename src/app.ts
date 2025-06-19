@@ -3,13 +3,13 @@ import cors from "cors"
 import path from "path"
 import { fileURLToPath } from 'url'
 import connectDB from "./config/db"
-import { admin } from "./routes"
+import { admin, user } from "./routes"
 // import admin from "firebase-admin"
 import { checkValidAdminRole, checkValidStoreRole } from "./utils"
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import { checkWebAuth } from "./middleware/check-auth"
-import { forgotPassword, login, logout, newPassswordAfterOTPVerified, signup, verifyOtpPasswordReset } from "./controllers/auth/auth-controller"
+import { checkAuth, checkWebAuth } from "./middleware/check-auth"
+import { forgotPassword, login, logout, newPassswordAfterOTPVerified, resendOtp, signup, verifyOtpPasswordReset, verifyOtpSignup } from "./controllers/auth/auth-controller"
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url) // <-- Define __filename
@@ -54,19 +54,20 @@ app.get("/", (_, res: any) => {
 });
 
 app.use("/api/admin", checkValidAdminRole, admin);
-// app.use("/api/user-products", userProducts);
+app.use("/api/user", checkAuth, user);
 
 //adminAuth routes
 app.post("/api/login", login)
 app.post("/api/logout", logout)
 app.post("/api/verify-otp", verifyOtpPasswordReset)
+app.post("/api/signup/verify-otp", verifyOtpSignup)
 app.post("/api/forgot-password", forgotPassword)
 app.patch("/api/new-password-otp-verified", newPassswordAfterOTPVerified)
 
 // //userAuth routes
 app.post("/api/signup", signup)
 // app.post("/api/user-verify-otp", verifyOTP)
-// app.post("/api/resend-otp", resendOTP)
+app.post("/api/resend-otp", resendOtp)
 // app.post("/api/user-forgot-password", forgotPasswordUser)
 // app.patch("/api/user-new-password-otp-verified", newPasswordAfterOTPVerifiedUser)
 

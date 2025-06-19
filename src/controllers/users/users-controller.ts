@@ -5,11 +5,11 @@ import {
   createUserService,
   loginUserService,
   verifyOtpService,
-  resendOtpService,
   getAllUsersService,
   getUserByIdService,
   updateUserService,
   deleteUserService,
+  getCurrentUserService,
  
 } from "../../services/users/users-service";
 
@@ -52,18 +52,6 @@ export const verifyOTP = async (req: Request, res: Response) => {
   }
 };
 
-// Resend OTP
-export const resendOTP = async (req: Request, res: Response) => {
-  try {
-    const response = await resendOtpService(req.body, res);
-    return res.status(httpStatusCode.OK).json(response);
-  } catch (error: any) {
-    const { code, message } = errorParser(error);
-    return res
-      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: message || "An error occurred" });
-  }
-};
 
 // Get All Users
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -82,6 +70,17 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const response = await getUserByIdService(req.params.id, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const response = await getCurrentUserService(req.user, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

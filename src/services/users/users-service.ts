@@ -162,31 +162,7 @@ export const verifyOtpService = async (payload: any, res: Response) => {
 };
 
 // Resend OTP
-export const resendOtpService = async (payload: any, res: Response) => {
-  const { phoneNumber } = payload;
 
-  if (!phoneNumber) {
-    return errorResponseHandler("Phone number is required", httpStatusCode.BAD_REQUEST, res);
-  }
-
-  // Check if user exists
-  const user = await usersModel.findOne({ phoneNumber });
-
-  if (!user) {
-    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
-  }
-
-  // Generate new OTP
-  const otp = await generatePasswordResetTokenByPhone(phoneNumber);
-
-  // Send OTP via SMS
-  await generatePasswordResetTokenByPhoneWithTwilio(phoneNumber, otp.token);
-
-  return {
-    success: true,
-    message: "OTP sent successfully to your phone number",
-  };
-};
 
 // Get All Users
 export const getAllUsersService = async (payload: any) => {
@@ -223,6 +199,19 @@ export const getUserByIdService = async (id: string, res: Response) => {
   const user = await usersModel.findById(id).select("-password");
   //TODO add orders
   //TODO: return Total Revenue Generated, Most Sold Product,Total Products Listed,Products Sold and list of products
+  if (!user) {
+    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  }
+
+  return {
+    success: true,
+    message: "User retrieved successfully",
+    data: user
+  };
+};
+export const getCurrentUserService = async (userData: any, res: Response) => {
+  const id = userData._id || userData.id;
+  const user = await usersModel.findById(id).select("-password");
   if (!user) {
     return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
   }

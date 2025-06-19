@@ -24,12 +24,12 @@ export const sendLoginCredentialsEmail = async (email: string, password: string)
         react: LoginCredentials({ email: email || "", password: password || "" }),
     })
 }  
-export const sendEmailVerificationMail = async (email:string,otp: string, language: string) => {
+export const sendEmailVerificationMail = async (email:string,otp: string) => {
    return await resend.emails.send({
         from: process.env.COMPANY_RESEND_GMAIL_ACCOUNT as string,
         to: email,
         subject: "Verify Email",
-        react: VerifyEmail({ otp: otp, language: language })
+        react: VerifyEmail({ otp: otp })
     })
 }   
 

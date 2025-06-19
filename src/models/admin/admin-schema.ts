@@ -38,6 +38,7 @@ const adminSchema = new mongoose.Schema({
     },
     
     address: { type: String },
+    
   },
   { timestamps: true }
 );

@@ -20,27 +20,25 @@ export const getCurrentISTTime = (): Date => {
 
 export const generatePasswordResetToken = async (
   email: string | null,
-  phoneNumber: string | null
 ) => {
-  console.log("phoneNumber: ", phoneNumber);
-  console.log("email: ", email);
+
   const genId = customAlphabet("0123456789", 6);
   const token = genId();
   
   // Get current time in IST
   const currentTime = getCurrentISTTime();
   
-  // Set expiry to 2 minutes from current IST time
+  // Set expiry to 5 minutes from current IST time
   const expires = new Date(currentTime.getTime() + 5 * 60 * 1000);
   
   console.log(`Generated token at ${currentTime.toISOString()} IST, expires at ${expires.toISOString()} IST`);
 
-  if (!phoneNumber && !email) {
-    throw new Error("Either phone number or email is required");
+  if (!email) {
+    throw new Error("Email is required");
   }
 
   const existingToken = await passwordResetTokenModel.findOne({
-    $or: [{ phoneNumber }, { email }],
+    email,
   });
   console.log("existingToken: ", existingToken);
   if (existingToken) {
@@ -48,7 +46,6 @@ export const generatePasswordResetToken = async (
   }
 
   const tokenData = {
-    phoneNumber: phoneNumber || null,
     token,
     expires,
     email: email || null,

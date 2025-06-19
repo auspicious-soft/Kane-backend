@@ -4,8 +4,8 @@ import { Response } from "express";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { passwordResetTokenModel } from '../../models/password-token-schema';
-import { sendPasswordResetEmail } from '../../utils/mails/mail';
-import { generatePasswordResetToken, getPasswordResetTokenByToken } from '../../utils/mails/token';
+import { sendEmailVerificationMail, sendPasswordResetEmail } from '../../utils/mails/mail';
+import { generatePasswordResetToken, generatePasswordResetTokenByPhone, getPasswordResetTokenByToken } from '../../utils/mails/token';
 import { generatePasswordResetTokenByPhoneWithTwilio } from "../../utils/sms/sms";
 import { usersModel } from "../../models/users/users-schema";
 import jwt from "jsonwebtoken";
@@ -26,7 +26,18 @@ export const loginService = async (payload: any, res: Response) => {
     }
   }
   if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+ if (userType==="user" && !user.isVerified) {
+     const existingToken = await passwordResetTokenModel.findOne({ email });
+    if (existingToken) {
+      await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
+    }
 
+  const passwordResetToken = await generatePasswordResetToken(email);
+  if (passwordResetToken !== null) {
+    await sendEmailVerificationMail(email, passwordResetToken.token);
+    return { success: true, message: "Your email is not verified. Verification email sent with otp" };
+  }
+  }
  const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     return errorResponseHandler("Invalid password", httpStatusCode.UNAUTHORIZED, res);
@@ -39,7 +50,7 @@ export const loginService = async (payload: any, res: Response) => {
   if (userType === 'user') {
     token = jwt.sign(
       { id: user._id, email: user.email, type: userType },
-      process.env.JWT_SECRET || "your_jwt_secret"
+      process.env.AUTH_SECRET || "your_jwt_secret"
     );
   }
 if(userType==='user'){
@@ -86,21 +97,31 @@ export const signupService = async (payload: any, res: Response) => {
     delete userObject.password;
   }
 
-  // Generate JWT token for the new user
-  const token = jwt.sign(
-    { id: newUser._id, email: newUser.email, type: 'user' },
-    process.env.JWT_SECRET || "your_jwt_secret",
-    { expiresIn: "1d" }
-  );
+    const existingToken = await passwordResetTokenModel.findOne({ email });
+    if (existingToken) {
+      await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
+    }
 
-  return {
-    success: true,
-    message: "Signup successful",
-    data: {
-      user: userObject,
-      token,
-    },
-  };
+  const passwordResetToken = await generatePasswordResetToken(email);
+  if (passwordResetToken !== null) {
+    await sendEmailVerificationMail(email, passwordResetToken.token);
+    return { success: true, message: "Verification email sent with otp" };
+  }
+  // Generate JWT token for the new user
+  // const token = jwt.sign(
+  //   { id: newUser._id, email: newUser.email, type: 'user' },
+  //   process.env.AUTH_SECRET || "your_jwt_secret",
+  //   { expiresIn: "1d" }
+  // );
+
+  // return {
+  //   success: true,
+  //   message: "Signup successful && password reset email sent",
+  //   data: {
+  //     // user: userObject,
+  //     // token,
+  //   },
+  // };
 };
 
 
@@ -124,7 +145,7 @@ export const forgotPasswordService = async (email: string, res: Response) => {
       await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
     }
 
-  const passwordResetToken = await generatePasswordResetToken(email, null);
+  const passwordResetToken = await generatePasswordResetToken(email);
   if (passwordResetToken !== null) {
     await sendPasswordResetEmail(email, passwordResetToken.token);
     return { success: true, message: "Password reset email sent with otp" };
@@ -147,7 +168,42 @@ export const verifyOtpPasswordResetService = async (
   const hasExpired = new Date(existingToken.expires) < new Date();
   if (hasExpired)
     return errorResponseHandler("OTP expired", httpStatusCode.BAD_REQUEST, res);
+
   return { success: true, message: "OTP verified successfully" };
+};
+export const verifyOtpSignupService = async (
+  otp: string,
+  res: Response
+) => {
+  const existingToken = await getPasswordResetTokenByToken(otp);
+  if (!existingToken)
+    return errorResponseHandler(
+      "Invalid token",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
+ 
+  const hasExpired = new Date(existingToken.expires) < new Date();
+  if (hasExpired)
+    return errorResponseHandler("OTP expired", httpStatusCode.BAD_REQUEST, res);
+  const user = await usersModel.findOne({ email: existingToken.email });
+  if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  // If user is found, delete the token
+  await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
+  user.isVerified = true;
+  await user.save();
+  // Remove password from user object
+  const userObject = user.toObject() as typeof user & { password?: string };
+  if ('password' in userObject) {
+    delete userObject.password;
+  }
+  // Generate JWT token for the user
+  const token = jwt.sign(
+    { id: user._id, email: user.email, type: 'user' },
+    process.env.AUTH_SECRET || "your_jwt_secret",
+    // { expiresIn: "1d" }
+  );
+  return { success: true, message: "OTP verified successfully",data: { user: userObject, token } };
 };
  
 export const newPassswordAfterOTPVerifiedService = async (payload: { password: string; otp: string }, res: Response) => {
@@ -194,6 +250,34 @@ export const newPassswordAfterOTPVerifiedService = async (payload: { password: s
       userType,
       user: userObject,
     },
+  };
+};
+
+export const resendOtpService = async (email: any, res: Response) => {
+
+  if (!email) {
+    return errorResponseHandler("Email is required", httpStatusCode.BAD_REQUEST, res);
+  }
+
+  // Check if user exists
+  const user = await usersModel.findOne({ email });
+
+  if (!user) {
+    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  }
+  const existingToken = await passwordResetTokenModel.findOne({ email });
+  if (existingToken) {
+    await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
+  }
+  // Generate new OTP
+  const otp = await generatePasswordResetToken(email);
+
+  // Send OTP via email
+  await sendEmailVerificationMail(email, otp.token);
+
+  return {
+    success: true,
+    message: "OTP sent successfully to your email",
   };
 };
 

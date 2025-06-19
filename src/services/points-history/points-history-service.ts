@@ -5,14 +5,25 @@ import { httpStatusCode } from "../../lib/constant";
 import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { pointsHistoryModel } from "../../models/points-history/points-history-schema";
+import { usersModel } from "../../models/users/users-schema";
 
 
 // Create Points History
-export const createPointsHistoryService = async (payload: any, res: Response) => {
+export const createPointsHistoryService = async (userId:string,payload: any, res: Response) => {
   if (!payload) {
     return errorResponseHandler("Points history data is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const pointsHistory = await pointsHistoryModel.create(payload);
+  const pointsHistory = await pointsHistoryModel.create({...payload,userId});
+  if (!pointsHistory) {
+    return errorResponseHandler("Failed to create points history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
+  }
+  // Update user's total points
+  const user = await usersModel.findById({_id: userId});
+  if (!user) {
+    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  }
+  user.totalPoints += pointsHistory.points;
+  await user.save();
   return {
     success: true,
     message: "Points history created successfully",
