@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import connectDB from "./config/db"
 import { admin, user } from "./routes"
 // import admin from "firebase-admin"
-import { checkValidAdminRole, checkValidStoreRole } from "./utils"
+import { checkValidAdminRole } from "./utils"
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import { checkAuth, checkWebAuth } from "./middleware/check-auth"

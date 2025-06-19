@@ -40,7 +40,6 @@ export const generatePasswordResetToken = async (
   const existingToken = await passwordResetTokenModel.findOne({
     email,
   });
-  console.log("existingToken: ", existingToken);
   if (existingToken) {
     await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
   }
