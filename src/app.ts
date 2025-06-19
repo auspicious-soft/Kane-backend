@@ -63,7 +63,6 @@ app.post("/api/verify-otp", verifyOtpPasswordReset)
 app.post("/api/signup/verify-otp", verifyOtpSignup)
 app.post("/api/forgot-password", forgotPassword)
 app.patch("/api/new-password-otp-verified", newPassswordAfterOTPVerified)
-
 // //userAuth routes
 app.post("/api/signup", signup)
 // app.post("/api/user-verify-otp", verifyOTP)

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { loginService, newPassswordAfterOTPVerifiedService, forgotPasswordService, getAdminDetailsService, verifyOtpPasswordResetService, signupService, verifyOtpSignupService, resendOtpService } from "../../services/auth/auth-service";
+import { loginService, newPassswordAfterOTPVerifiedService, forgotPasswordService, getAdminDetailsService, verifyOtpPasswordResetService, signupService, verifyOtpSignupService, resendOtpService, logoutService } from "../../services/auth/auth-service";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 
@@ -22,26 +22,17 @@ export const signup = async (req: Request, res: Response) => {
 		return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
 	}
 };
-
 export const logout = async (req: Request, res: Response) => {
 	try {
-		// Clear the token cookie
-		res.cookie("token", "", {
-			httpOnly: true,
-			expires: new Date(0), // Set expiration to past date to delete the cookie
-			secure: process.env.COOKIE_SECURE === "true", // Controlled by environment variable
-			sameSite: "strict",
-		});
-
-		return res.status(httpStatusCode.OK).json({
-			success: true,
-			message: "Logged out successfully",
-		});
+		const response = await logoutService(req?.user, res);
+		return res.status(httpStatusCode.OK).json(response);
 	} catch (error: any) {
 		const { code, message } = errorParser(error);
 		return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
 	}
 };
+
+
 export const getAdminDetails = async (req: Request, res: Response) => {
 	try {
 		const response = await getAdminDetailsService(req.body, res);
@@ -72,9 +63,9 @@ export const verifyOtpPasswordReset = async (req: Request, res: Response) => {
 	}
 };
 export const verifyOtpSignup = async (req: Request, res: Response) => {
-	const { otp } = req.body;
+	const { otp, fcmToken } = req.body;
 	try {
-		const response = await verifyOtpSignupService(otp, res);
+		const response = await verifyOtpSignupService(otp, fcmToken, res);
 		return res.status(httpStatusCode.OK).json(response);
 	} catch (error: any) {
 		const { code, message } = errorParser(error);

@@ -210,8 +210,7 @@ export const getUserByIdService = async (id: string, res: Response) => {
   };
 };
 export const getCurrentUserService = async (userData: any, res: Response) => {
-  const id = userData._id || userData.id;
-  const user = await usersModel.findById(id).select("-password");
+  const user = await usersModel.findById(userData.  id).select("-password");
   if (!user) {
     return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
   }
@@ -226,7 +225,6 @@ export const getCurrentUserService = async (userData: any, res: Response) => {
 // Update User
 export const updateUserService = async (id: string, payload: any, res: Response) => {
   const user = await usersModel.findById(id);
-
   if (!user) {
     return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
   }
@@ -260,7 +258,7 @@ export const deleteUserService = async (id: string, res: Response) => {
     return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
   }
 
-  await usersModel.findByIdAndDelete(id);
+  await usersModel.findByIdAndUpdate(id, { isDeleted: true });
 
   return {
     success: true,

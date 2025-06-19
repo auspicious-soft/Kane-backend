@@ -12,7 +12,7 @@ import jwt from "jsonwebtoken";
  
  
 export const loginService = async (payload: any, res: Response) => {
-  const { email, password } = payload;
+  const { email, password ,fcmToken} = payload;
   let user: any = null;
   let userType: 'admin' | 'user' | null = null;
 
@@ -26,6 +26,7 @@ export const loginService = async (payload: any, res: Response) => {
     }
   }
   if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  if(user.isDeleted === true) return errorResponseHandler("User account is deleted", httpStatusCode.FORBIDDEN, res);
  if (userType==="user" && !user.isVerified) {
      const existingToken = await passwordResetTokenModel.findOne({ email });
     if (existingToken) {
@@ -35,7 +36,7 @@ export const loginService = async (payload: any, res: Response) => {
   const passwordResetToken = await generatePasswordResetToken(email);
   if (passwordResetToken !== null) {
     await sendEmailVerificationMail(email, passwordResetToken.token);
-    return { success: true, message: "Your email is not verified. Verification email sent with otp" };
+    return { success: true, message: "Your email is not verified. Verification email sent with otp", data: { user , token:null} };
   }
   }
  const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -43,9 +44,14 @@ export const loginService = async (payload: any, res: Response) => {
     return errorResponseHandler("Invalid password", httpStatusCode.UNAUTHORIZED, res);
   }
   const userObject = user.toObject() as typeof user & { password?: string };
+  userObject.fcmToken = fcmToken; 
+  if (fcmToken) { 
+    userObject.fcmToken = fcmToken; 
+    user.fcmToken = fcmToken; 
+    await user.save(); 
+  }
   delete userObject.password;
 
-  // If user is from usersModel, generate JWT token
   let token = "";
   if (userType === 'user') {
     token = jwt.sign(
@@ -173,6 +179,7 @@ export const verifyOtpPasswordResetService = async (
 };
 export const verifyOtpSignupService = async (
   otp: string,
+  fcmToken: string,
   res: Response
 ) => {
   const existingToken = await getPasswordResetTokenByToken(otp);
@@ -191,6 +198,7 @@ export const verifyOtpSignupService = async (
   // If user is found, delete the token
   await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
   user.isVerified = true;
+  user.fcmToken = fcmToken; 
   await user.save();
   // Remove password from user object
   const userObject = user.toObject() as typeof user & { password?: string };
@@ -286,6 +294,19 @@ export const getAdminDetailsService = async (payload: any, res: Response) => {
   return {
     success: true,
     data: results,
+  };
+};
+export const logoutService = async (userId: any, res: Response) => {
+
+  const user = await usersModel.findById({ _id: userId.id });
+  if (!user) {
+    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  }
+  user.fcmToken = ""; 
+  await user.save();
+  return {
+    success: true,
+    message: "User logged out successfully",
   };
 };
  
