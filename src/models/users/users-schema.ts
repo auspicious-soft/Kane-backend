@@ -75,7 +75,7 @@ const userSchema = new mongoose.Schema({
     reasonForBlock: {
       type: String,
       required: false,
-      default: null
+
     },
     isDeleted: {
       type: Boolean,

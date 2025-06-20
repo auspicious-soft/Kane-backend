@@ -10,6 +10,7 @@ import {
   getCurrentUserService,
   blockUserService,
   getUserHistoryService,
+  getAllBlockedUsersService,
  
 } from "../../services/users/users-service";
 
@@ -17,6 +18,17 @@ import {
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const response = await getAllUsersService(req.query);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const getAllBlockedUsers = async (req: Request, res: Response) => {
+  try {
+    const response = await getAllBlockedUsersService(req.query);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -88,7 +100,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 };
 export const blockUser = async (req: Request, res: Response) => {
   try {
-    const response = await blockUserService(req.params.id, res);
+    const response = await blockUserService(req.body, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

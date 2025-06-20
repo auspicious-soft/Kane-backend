@@ -31,6 +31,28 @@ export const getAllUsersService = async (payload: any) => {
 		},
 	};
 };
+export const getAllBlockedUsersService = async (payload: any) => {
+	const page = parseInt(payload.page as string) || 1;
+	const limit = parseInt(payload.limit as string) || 10;
+	const offset = (page - 1) * limit;
+
+	// Get search query from queryBuilder
+	let { query, sort } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
+
+	const totalUsers = await usersModel.countDocuments(query, { isBlocked: true });
+	const users = await usersModel.find( { isBlocked: true , ...query }).sort(sort).skip(offset).limit(limit).select("-password");
+
+	return {
+		success: true,
+		message: "Blocked users retrieved successfully",
+		data: {
+			users,
+			page,
+			limit,
+			total: totalUsers,
+		},
+	};
+};
 
 // Get User by ID
 export const getUserByIdService = async (id: string, res: Response) => {
@@ -135,14 +157,14 @@ export const deleteUserService = async (id: string, res: Response) => {
 		message: "User deleted successfully",
 	};
 };
-export const blockUserService = async (id: string, res: Response) => {
-	const user = await usersModel.findById(id);
+export const blockUserService = async ( payload: any, res: Response) => {
+	const user = await usersModel.findById(payload.id);
 
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 
-	await usersModel.findByIdAndUpdate(id, { isBlocked: user.isBlocked ? false : true });
+	await usersModel.findByIdAndUpdate(payload.id, { isBlocked: user.isBlocked ? false : true , reasonForBlock: user.isBlocked ? null : payload.reasonForBlock });
 
 	return {
 		success: true,

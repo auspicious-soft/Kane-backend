@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { blockUser, getAllUsers, getUserById, getUserHistory } from "../controllers/users/users-controller";
+import { blockUser, getAllBlockedUsers, getAllUsers, getUserById, getUserHistory } from "../controllers/users/users-controller";
 import { createRestaurant, createRestaurantOffer, deleteRestaurant, getAllRestaurant, getAllRestaurantOffers, getRestaurantById, getRestaurantOfferById, updateRestaurant, updateRestaurantOffer } from "../controllers/restaurants/restaurants-controller";
 
 const router = Router();
@@ -18,8 +18,9 @@ router.put("/restaurants-offers/:id", updateRestaurantOffer);
 
 //users ROUTES
 router.get("/users", getAllUsers);
+router.get("/blocked-users", getAllBlockedUsers);
 router.get("/users/:id", getUserById);        
-router.put("/block-user/:id", blockUser);
+router.put("/block-user", blockUser);
 router.get("/users/:id/history", getUserHistory);
 
 export { router };
