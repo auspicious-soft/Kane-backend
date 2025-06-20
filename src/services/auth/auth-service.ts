@@ -5,8 +5,7 @@ import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { passwordResetTokenModel } from '../../models/password-token-schema';
 import { sendEmailVerificationMail, sendPasswordResetEmail } from '../../utils/mails/mail';
-import { generatePasswordResetToken, generatePasswordResetTokenByPhone, getPasswordResetTokenByToken } from '../../utils/mails/token';
-import { generatePasswordResetTokenByPhoneWithTwilio } from "../../utils/sms/sms";
+import { generatePasswordResetToken, getPasswordResetTokenByToken } from '../../utils/mails/token';
 import { usersModel } from "../../models/users/users-schema";
 import jwt from "jsonwebtoken";
  

@@ -72,10 +72,23 @@ const userSchema = new mongoose.Schema({
       type: Boolean,
       default: false
     },
+    reasonForBlock: {
+      type: String,
+      required: false,
+      default: null
+    },
     isDeleted: {
       type: Boolean,
       default: false
     },
+    profilePicture: {
+      type: String,
+    },
+    totalMoneyEarned: {
+      type: Number,
+      default: 0
+    },
+
   },
   { timestamps: true }
 );

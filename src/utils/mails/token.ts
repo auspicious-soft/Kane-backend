@@ -27,9 +27,9 @@ export const generatePasswordResetToken = async (
   
   // Get current time in IST
   const currentTime = getCurrentISTTime();
-  
-  // Set expiry to 5 minutes from current IST time
-  const expires = new Date(currentTime.getTime() + 5 * 60 * 1000);
+
+  // Set expiry to 1 minutes from current IST time
+  const expires = new Date(currentTime.getTime() + 1 * 60 * 1000);
   
   console.log(`Generated token at ${currentTime.toISOString()} IST, expires at ${expires.toISOString()} IST`);
 
