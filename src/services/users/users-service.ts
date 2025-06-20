@@ -80,13 +80,13 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
   let totalHistory;
   if (payload.type === "points") {
 		totalHistory = await pointsHistoryModel.countDocuments(query);
-		history = await pointsHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit);
+		history = await pointsHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("restaurantId");
 	} else if (payload.type === "offer") {
 		totalHistory = await offersHistoryModel.countDocuments(query);
-		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit);
+		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("offerId");
 	} else {
 		totalHistory = await offersHistoryModel.countDocuments(query);
-		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit);
+		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("offerId");
 	}
 	return {
 		success: true,

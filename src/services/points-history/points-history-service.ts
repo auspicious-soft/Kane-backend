@@ -9,20 +9,26 @@ import { usersModel } from "../../models/users/users-schema";
 
 
 // Create Points History
-export const createPointsHistoryService = async (userId:string,payload: any, res: Response) => {
+export const createPointsHistoryService = async ( payload: any, res: Response) => {
   if (!payload) {
     return errorResponseHandler("Points history data is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const pointsHistory = await pointsHistoryModel.create({...payload,userId});
+  const pointsHistory = await pointsHistoryModel.create({...payload});
   if (!pointsHistory) {
     return errorResponseHandler("Failed to create points history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
   }
   // Update user's total points
-  const user = await usersModel.findById({_id: userId});
+  const user = await usersModel.findById({_id: pointsHistory.userId});
   if (!user) {
     return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
   }
   user.totalPoints += pointsHistory.points;
+  if (payload.type === "redeem") {
+    user.redeemedPoints += pointsHistory.points;
+  }
+  if(payload.type === "earn") {
+    user.activePoints += pointsHistory.points;
+  }
   await user.save();
   return {
     success: true,

@@ -2,20 +2,22 @@ import { Response } from "express";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
+import { usersModel } from "../../models/users/users-schema";
 
 
 export const createOfferHistoryService = async (payload: any, res: Response) => {
-  const { userId, offerId, redeemedAt, status } = payload;
-  if (!userId || !offerId || !redeemedAt || !status) {
+  const { userId, offerId, type } = payload;
+  if (!userId || !offerId || !type || !["earn", "redeem"].includes(type)) {
     return errorResponseHandler("All offer history fields are required", httpStatusCode.BAD_REQUEST, res);
   }
   const offerHistory = await offersHistoryModel.create({
     userId,
     offerId,
-    redeemedAt,
-    status
+    type
   });
-
+  if (!offerHistory) {
+    return errorResponseHandler("Failed to create offer history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
+  }
   return {
     success: true,
     message: "Offer history created successfully",
@@ -53,10 +55,9 @@ export const updateOfferHistoryService = async (historyId: string, payload: any,
   if (!historyId) {
     return errorResponseHandler("Offer history ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const { userId, offerId, redeemedAt, status } = payload;
   const updatedOfferHistory = await offersHistoryModel.findByIdAndUpdate(
     historyId,
-    { userId, offerId, redeemedAt, status },
+    { ...payload },
     { new: true }
   );
 
