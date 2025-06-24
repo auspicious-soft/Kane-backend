@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { blockUser, getAllBlockedUsers, getAllUsers, getUserById, getUserHistory } from "../controllers/users/users-controller";
 import { createRestaurant, createRestaurantOffer, deleteRestaurant, getAllRestaurant, getAllRestaurantOffers, getRestaurantById, getRestaurantOfferById, updateRestaurant, updateRestaurantOffer } from "../controllers/restaurants/restaurants-controller";
+import { createSettings, getSettings } from "../controllers/settings/settings-controller";
 
 const router = Router();
 //restaurants ROUTES
@@ -22,5 +23,10 @@ router.get("/blocked-users", getAllBlockedUsers);
 router.get("/users/:id", getUserById);        
 router.put("/block-user", blockUser);
 router.get("/users/:id/history", getUserHistory);
+
+//Settings
+router.post("/settings", createSettings);
+router.get("/settings", getSettings);
+
 
 export { router };
