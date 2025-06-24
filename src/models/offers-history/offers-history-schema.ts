@@ -11,7 +11,7 @@ const offersHistorySchema = new mongoose.Schema({
     },
     offerId:{
       type: Types.ObjectId,
-      ref: "offer",
+      ref: "restaurant_offer",
       required: true,
     },
     userId: {

@@ -6,7 +6,7 @@ import { queryBuilder } from "../../utils";
 import { usersModel } from "../../models/users/users-schema";
 import { of, type } from "./../../../node_modules/next/dist/compiled/webpack/bundle5";
 import { offersHistoryModel } from "./../../models/offers-history/offers-history-schema";
-import { pointsHistoryModel } from './../../models/points-history/points-history-schema';
+import { pointsHistoryModel } from "./../../models/points-history/points-history-schema";
 
 // Get All Users
 export const getAllUsersService = async (payload: any) => {
@@ -40,7 +40,12 @@ export const getAllBlockedUsersService = async (payload: any) => {
 	let { query, sort } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
 
 	const totalUsers = await usersModel.countDocuments(query, { isBlocked: true });
-	const users = await usersModel.find( { isBlocked: true , ...query }).sort(sort).skip(offset).limit(limit).select("-password");
+	const users = await usersModel
+		.find({ isBlocked: true, ...query })
+		.sort(sort)
+		.skip(offset)
+		.limit(limit)
+		.select("-password");
 
 	return {
 		success: true,
@@ -76,9 +81,9 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 	const limit = parseInt(payload.limit as string) || 10;
 	const offset = (page - 1) * limit;
 	const query = { userId: id };
-  let history;
-  let totalHistory;
-  if (payload.type === "points") {
+	let history;
+	let totalHistory;
+	if (payload.type === "points") {
 		totalHistory = await pointsHistoryModel.countDocuments(query);
 		history = await pointsHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("restaurantId");
 	} else if (payload.type === "offer") {
@@ -123,15 +128,15 @@ export const updateUserService = async (id: string, payload: any, res: Response)
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 
-	// If updating password, hash it
-	if (payload.password) {
-		payload.password = await bcrypt.hash(payload.password, 10);
-	}
+	// // If updating password, hash it
+	// if (payload.password) {
+	// 	payload.password = await bcrypt.hash(payload.password, 10);
+	// }
 
-	// If updating email, set verification status to false
-	if (payload.email && payload.email !== user.email) {
-		payload.isVerified = false;
-	}
+	// // If updating email, set verification status to false
+	// if (payload.email && payload.email !== user.email) {
+	// 	payload.isVerified = false;
+	// }
 
 	const updatedUser = await usersModel.findByIdAndUpdate(id, payload, { new: true }).select("-password");
 
@@ -157,17 +162,37 @@ export const deleteUserService = async (id: string, res: Response) => {
 		message: "User deleted successfully",
 	};
 };
-export const blockUserService = async ( payload: any, res: Response) => {
+
+export const blockUserService = async (payload: any, res: Response) => {
 	const user = await usersModel.findById(payload.id);
 
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 
-	await usersModel.findByIdAndUpdate(payload.id, { isBlocked: user.isBlocked ? false : true , reasonForBlock: user.isBlocked ? null : payload.reasonForBlock });
+	await usersModel.findByIdAndUpdate(payload.id, { isBlocked: user.isBlocked ? false : true, reasonForBlock: user.isBlocked ? null : payload.reasonForBlock });
 
 	return {
 		success: true,
 		message: `User ${user.isBlocked ? "unblocked" : "blocked"} successfully`,
+	};
+};
+
+export const changePasswordService = async (userDetails: any, payload: any, res: Response) => {
+	const { newPassword, oldPassword } = payload;
+	const user = await usersModel.findById(userDetails.id);
+	if (!user) {
+		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	}
+	const isPasswordValid = await bcrypt.compare(oldPassword, user.password ?? "");
+	if (isPasswordValid) {
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+		await usersModel.findByIdAndUpdate(user._id, { password: hashedPassword }, { new: true });
+	} else {
+		return errorResponseHandler("Old password does not match", httpStatusCode.CONFLICT, res);
+	}
+	return {
+		success: true,
+		message: `Password changed successfully`,
 	};
 };

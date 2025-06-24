@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { blockUser, deleteUser, getAllUsers, getCurrentUser, getUserById, updateUser } from "../controllers/users/users-controller";
+import { blockUser, changePassword, deleteUser, getAllUsers, getCurrentUser, getUserById, updateUser } from "../controllers/users/users-controller";
 import { createRestaurant, createRestaurantOffer, deleteRestaurant, getAllRestaurant, getAllRestaurantOffers, getRestaurantById, getRestaurantOfferById, updateRestaurant, updateRestaurantOffer } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
 import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
@@ -18,6 +18,8 @@ router.post("/logout", logout);
 router.post("/offer-history", createOfferHistory);
 router.post("/points-history", createPointsHistory);
 
+// Settings routes
+router.put("/change-password", changePassword);
 
 
 export { router };
