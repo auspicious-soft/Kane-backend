@@ -37,6 +37,10 @@ const restaurantOffersSchema = new mongoose.Schema({
     unlockRewards: {
       type: String,
       required: true,
+    },
+    isActive:{
+      type:Boolean,
+      default:true
     }
   },
   { timestamps: true }
