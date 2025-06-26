@@ -9,6 +9,7 @@ import { pointsHistoryModel } from "./../../models/points-history/points-history
 import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { referralHistoryModel } from "../../models/referral-history/referral-history-schema";
+import mongoose from "mongoose";
 
 // Get All Users
 export const getAllUsersService = async (payload: any) => {
@@ -118,7 +119,6 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 	};
 };
 
-
 export const getCurrentUserService = async (userData: any, res: Response) => {
 	const user = await usersModel.findById(userData.id).select("-password");
 	if (!user) {
@@ -131,19 +131,37 @@ export const getCurrentUserService = async (userData: any, res: Response) => {
 		data: user,
 	};
 };
+export const getTopLeadersService = async (payload: any, res: Response) => {
+	const page = parseInt(payload.page as string) || 1;
+	const limit = parseInt(payload.limit as string) || 10;
+	const offset = (page - 1) * limit;
+	const totalTopLeaders = await usersModel.countDocuments({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false })
+	const topLeaders = await usersModel.find({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false }).select("-password").sort({ totalPoints: -1 }).skip(offset).limit(limit);
+	return {
+		success: true,
+		message: "User retrieved successfully",
+		data: {
+			page,
+			limit,
+			total: totalTopLeaders,
+			topLeaders,
+		},
+	};
+};
 export const getUserPointHistoryService = async (userData: any, res: Response) => {
-	//TODO MONTH OR DATE FILTER FILTER
 	const user = await usersModel.findById(userData.id);
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-	const pointsHistory = await pointsHistoryModel.find({userId:userData.id}).populate({path:"restaurantId", select:""})
+	const pointsHistory = await pointsHistoryModel.find({ userId: userData.id }).populate({ path: "restaurantId", select: "" });
 	return {
 		success: true,
 		message: "User points history retrieved successfully",
 		data: {
-			totalPoints:user.totalPoints,
-			pointsHistory
+			totalPoints: user.totalPoints,
+			currency: user.currency,
+			totalMoneyEarned: user.totalMoneyEarned,
+			pointsHistory,
 		},
 	};
 };
@@ -227,14 +245,16 @@ export const homePageService = async (userDetails: any, payload: any, res: Respo
 	const user = await usersModel.findById(userDetails.id);
 	if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 
-	const popularRestaurants = await RestaurantsModel.find().limit(10);
-	const offersAvailable = await RestaurantOffersModel.find().limit(10);
+	const popularRestaurants = await RestaurantsModel.find({ isDeleted: false }).limit(10);
+	const offersAvailable = await RestaurantOffersModel.find().limit(10).populate("restaurantId");
 
 	return {
 		success: true,
 		data: {
 			userName: user.fullName,
 			totalPoints: user.totalPoints,
+			currency: user.currency,
+			totalMoneyEarned: user.totalMoneyEarned,
 			popularRestaurants,
 			offersAvailable,
 		},
@@ -257,4 +277,48 @@ export const inviteCodeAndReferredDetailsService = async (userDetails: any, payl
 			invitedFriends,
 		},
 	};
+};
+
+export const updatePointsAndMoney = async (userId: any, valuePerPoint: any, totalPoints: any) => {
+	try {
+		// Validate input
+		// if (!mongoose.Types.ObjectId.isValid(userId)) {
+		//   throw new Error("Invalid user ID");
+		// }
+		// if (valuePerPoint == null || totalPoints == null) {
+		//   throw new Error("valuePerPoint and totalPoints are required");
+		// }
+		// if (typeof valuePerPoint !== "number" || typeof totalPoints !== "number") {
+		//   throw new Error("valuePerPoint and totalPoints must be numbers");
+		// }
+		// if (valuePerPoint < 0 || totalPoints < 0) {
+		//   throw new Error("valuePerPoint and totalPoints cannot be negative");
+		// }
+
+		// Calculate totalMoneyEarned
+		const totalMoneyEarned = valuePerPoint * totalPoints;
+
+		// Update user document
+		const updatedUser = await usersModel.findByIdAndUpdate(
+			userId,
+			{
+				totalMoneyEarned,
+				updatedAt: new Date(),
+			},
+			{ new: true, runValidators: true }
+		);
+
+		if (!updatedUser) {
+			throw new Error("User not found");
+		}
+
+		return {
+			_id: updatedUser._id,
+			valuePerPoint: updatedUser.valuePerPoint,
+			totalPoints: updatedUser.totalPoints,
+			totalMoneyEarned: updatedUser.totalMoneyEarned,
+		};
+	} catch (error) {
+		throw new Error(`Failed to update points and money: ${error.message}`);
+	}
 };

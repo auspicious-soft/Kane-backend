@@ -2,7 +2,7 @@ import mongoose, { Types } from "mongoose";
 import { customAlphabet } from "nanoid";
 
 const identifier = customAlphabet("0123456789", 5);
-export const referalCodeGenerator = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
+export const referalCodeGenerator = customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFCGHIJKLMNOPQRSTUVWXYZ0123456789", 10);
 
 const userSchema = new mongoose.Schema(
 	{
@@ -94,6 +94,14 @@ const userSchema = new mongoose.Schema(
 		totalMoneyEarned: {
 			type: Number,
 			default: 0,
+		},
+		currency:{
+			type:String,
+			default:"$"
+		},
+		valuePerPoint:{
+			type:Number,
+			default:1
 		},
 		topLeaderPrivacy: {
 			type: Boolean,

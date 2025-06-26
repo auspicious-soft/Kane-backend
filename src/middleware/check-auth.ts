@@ -53,7 +53,6 @@ export const checkAuth = async (req: Request, res: Response, next: NextFunction)
         const token = req.headers.authorization?.split(" ")[1] || req.cookies.token
         if (!token) return res.status(httpStatusCode.UNAUTHORIZED).json({ success: false, message: "Unauthorized token missing" })
             const decoded = jwt.verify(token, process.env.AUTH_SECRET as string)
-            console.log('decoded: ', decoded);
             if (!decoded) return res.status(httpStatusCode.UNAUTHORIZED).json({ success: false, message: "Unauthorized token invalid or expired" })
             req.user = decoded
  

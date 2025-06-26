@@ -9,9 +9,10 @@ import { generatePasswordResetToken, getPasswordResetTokenByToken } from "../../
 import { usersModel } from "../../models/users/users-schema";
 import jwt from "jsonwebtoken";
 import { customAlphabet } from "nanoid";
-import { NOTFOUND } from "dns";
 import { referralHistoryModel } from "../../models/referral-history/referral-history-schema";
 import { pointsHistoryModel } from "../../models/points-history/points-history-schema";
+import { generateBarcode } from "../../utils/generateBarcode";
+import { updatePointsAndMoney } from "../users/users-service";
 
 export const loginService = async (payload: any, res: Response) => {
 	const { email, password, fcmToken } = payload;
@@ -105,8 +106,11 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 			$push: { referredUsers: newUserId },
 		}
 	);
-	await pointsHistoryModel.create({pointsFrom:"REFERRAL_TO",title:`${fullName} used your referral code.`,userId: referrer._id, points:REFERRER_POINTS, type:"earn"});
-
+	const updatedReferrer = await usersModel.findById(referrer._id);
+	if (updatedReferrer) {
+		await updatePointsAndMoney(updatedReferrer._id, updatedReferrer.valuePerPoint, updatedReferrer.totalPoints);
+	}
+	await pointsHistoryModel.create({ pointsFrom: "REFERRAL_TO", title: `${fullName} used your referral code.`, userId: referrer._id, points: REFERRER_POINTS, type: "earn" });
 	// Update new user's points and referredBy atomically
 	await usersModel.updateOne(
 		{ _id: newUserId },
@@ -115,14 +119,16 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 			$set: { referredBy: referrer._id },
 		}
 	);
-	await pointsHistoryModel.create({pointsFrom:"USED_REFERRAL_CODE", title:`Used referral code.`,userId: newUserId, points:REFERRED_USER_POINTS, type:"earn"});
-
+	const updatedReferredUser = await usersModel.findById(newUserId);
+	if (updatedReferredUser) {
+	await updatePointsAndMoney(updatedReferredUser._id, updatedReferredUser.valuePerPoint, updatedReferredUser.totalPoints);
+	}
+	await pointsHistoryModel.create({ pointsFrom: "USED_REFERRAL_CODE", title: `Used referral code.`, userId: newUserId, points: REFERRED_USER_POINTS, type: "earn" });
 
 	console.log("Referral processed for user:", newUserId);
 }
 export const signupService = async (payload: any, res: Response) => {
 	const { email, password, referralCodeSignup } = payload;
-	console.log("payload: ", payload);
 	const referralCodeGenerator = customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFCGHIJKLMNOPQRSTUVWXYZ0123456789", 10);
 	// Check if user already exists in usersModel
 	let existingUser = await usersModel.findOne({ email: email });
@@ -140,7 +146,7 @@ export const signupService = async (payload: any, res: Response) => {
 	// Hash password and create new user
 	const hashedPassword = await bcrypt.hash(password, 10);
 	const newUser = await usersModel.create({ ...payload, password: hashedPassword });
-
+generateBarcode(newUser.identifier)
 	const userObject = newUser.toObject() as typeof newUser & { password?: string };
 	if ("password" in userObject) {
 		delete userObject.password;
@@ -164,10 +170,9 @@ export const signupService = async (payload: any, res: Response) => {
 	//       throw error;
 	//     }
 	//   }
-   if(payload.referralCodeSignup){
-
-	   await handleReferral(referralCodeSignup, newUser._id, newUser.fullName, res);
-   }
+	if (payload.referralCodeSignup) {
+		await handleReferral(referralCodeSignup, newUser._id, newUser.fullName, res);
+	}
 	const existingToken = await passwordResetTokenModel.findOne({ email });
 	if (existingToken) {
 		await passwordResetTokenModel.findByIdAndDelete(existingToken._id);
@@ -208,7 +213,7 @@ export const forgotPasswordService = async (email: string, res: Response) => {
 
 export const verifyOtpPasswordResetService = async (token: string, res: Response) => {
 	const existingToken = await getPasswordResetTokenByToken(token);
-	if (!existingToken) return errorResponseHandler("Invalid token", httpStatusCode.BAD_REQUEST, res);
+	if (!existingToken) return errorResponseHandler("Please enter valid OTP.", httpStatusCode.BAD_REQUEST, res);
 
 	const hasExpired = new Date(existingToken.expires) < new Date();
 	if (hasExpired) return errorResponseHandler("OTP expired", httpStatusCode.BAD_REQUEST, res);
@@ -217,7 +222,7 @@ export const verifyOtpPasswordResetService = async (token: string, res: Response
 };
 export const verifyOtpSignupService = async (otp: string, fcmToken: string, res: Response) => {
 	const existingToken = await getPasswordResetTokenByToken(otp);
-	if (!existingToken) return errorResponseHandler("Invalid token", httpStatusCode.BAD_REQUEST, res);
+	if (!existingToken) return errorResponseHandler("Please enter valid OTP.", httpStatusCode.BAD_REQUEST, res);
 
 	const hasExpired = new Date(existingToken.expires) < new Date();
 	if (hasExpired) return errorResponseHandler("OTP expired", httpStatusCode.BAD_REQUEST, res);
@@ -246,10 +251,10 @@ export const newPassswordAfterOTPVerifiedService = async (payload: { password: s
 	const { password, otp } = payload;
 
 	const existingToken = await getPasswordResetTokenByToken(otp);
-	if (!existingToken) return errorResponseHandler("Invalid OTP", httpStatusCode.BAD_REQUEST, res);
+	if (!existingToken) return errorResponseHandler("Please enter valid OTP.", httpStatusCode.BAD_REQUEST, res);
 
-	const hasExpired = new Date(existingToken.expires) < new Date();
-	if (hasExpired) return errorResponseHandler("OTP expired", httpStatusCode.BAD_REQUEST, res);
+	// const hasExpired = new Date(existingToken.expires) < new Date();
+	// if (hasExpired) return errorResponseHandler("OTP expired", httpStatusCode.BAD_REQUEST, res);
 
 	let user: any = null;
 	let userType: "admin" | "user" | null = null;
@@ -278,7 +283,6 @@ export const newPassswordAfterOTPVerifiedService = async (payload: { password: s
 	if (userObject && userObject.password) {
 		delete userObject.password;
 	}
-
 	return {
 		success: true,
 		message: "Password updated successfully",

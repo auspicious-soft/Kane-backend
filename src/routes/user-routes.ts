@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {  changePassword, deleteUser, getAllUsers, getCurrentUser, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, userHomePage } from "../controllers/users/users-controller";
+import {  changePassword, deleteUser, getAllUsers, getCurrentUser, getTopLeaders, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, userHomePage } from "../controllers/users/users-controller";
 import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOfferById } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
 import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
@@ -32,6 +32,8 @@ router.get("/restaurant-offers/:id", getRestaurantOfferById);
 
 //user Points-History routes
 router.get("/points-history", getUserPointHistory);
+//user top-leaders routes
+router.get("/top-leaders", getTopLeaders);
 
 
 

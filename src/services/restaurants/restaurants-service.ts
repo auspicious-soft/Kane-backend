@@ -138,7 +138,7 @@ export const createRestaurantOfferService = async (payload: any, res: Response) 
 	};
 };
 export const getAllRestaurantOffersService = async (res: Response) => {
-	const restaurantOffers = await RestaurantOffersModel.find({});
+	const restaurantOffers = await RestaurantOffersModel.find().populate("restaurantId");
 
 	return {
 		success: true,
@@ -150,7 +150,7 @@ export const getRestaurantOfferByIdService = async (offerId: string, res: Respon
 	if (!offerId) {
 		return errorResponseHandler("Offer ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const restaurantOffer = await RestaurantOffersModel.findById(offerId);
+	const restaurantOffer = await RestaurantOffersModel.findById(offerId).populate("restaurantId");
 
 	if (!restaurantOffer) {
 		return errorResponseHandler("Restaurant offer not found", httpStatusCode.NOT_FOUND, res);
@@ -220,10 +220,10 @@ export const getAllRestaurantOfferForUserService = async (payload: any, res: Res
 	let restaurantOffers;
 	if (payload.id) {
 		totalRestaurants = await RestaurantOffersModel.countDocuments({ restaurantId: payload.id });
-		restaurantOffers = await RestaurantOffersModel.find({ restaurantId: payload.id }).sort().skip(offset).limit(limit).select("visits image description offerName _id");
+		restaurantOffers = await RestaurantOffersModel.find({ restaurantId: payload.id }).sort().skip(offset).limit(limit).select("visits image description offerName _id").populate("restaurantId");
 	} else {
 		totalRestaurants = await RestaurantOffersModel.countDocuments();
-		restaurantOffers = await RestaurantOffersModel.find().sort().skip(offset).limit(limit).select("visits image description offerName _id");
+		restaurantOffers = await RestaurantOffersModel.find().sort().skip(offset).limit(limit).select("visits image description offerName _id").populate("restaurantId");
 	}
 	return {
 		success: true,

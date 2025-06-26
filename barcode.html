@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Display</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    .barcode-container {
+      border: 2px solid #000080;
+      border-radius: 5px;
+      padding: 20px;
+      text-align: center;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .barcode-img {
+      width: 200px; /* Adjust width as needed */
+      height: auto;
+    }
+    .id-text {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    .close-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #d2a679;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .close-btn:hover {
+      background-color: #b88d5e;
+    }
+  </style>
+</head>
+<body>
+  <div class="barcode-container">
+    <img src="barcode.png" alt="Barcode" class="barcode-img">
+    <div class="id-text">Your Id code is<br>undefined</div>
+    <button class="close-btn">Close</button>
+  </div>
+</body>
+</html>
+    
