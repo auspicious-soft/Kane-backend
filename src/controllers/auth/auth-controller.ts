@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { loginService, newPassswordAfterOTPVerifiedService, forgotPasswordService, getAdminDetailsService, verifyOtpPasswordResetService, signupService, verifyOtpSignupService, resendOtpService, logoutService } from "../../services/auth/auth-service";
+import { loginService, newPassswordAfterOTPVerifiedService, forgotPasswordService, getAdminDetailsService, verifyOtpPasswordResetService, signupService, verifyOtpSignupService, resendOtpService, logoutService, verifyReferralCodeService } from "../../services/auth/auth-service";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 
@@ -86,6 +86,15 @@ export const resendOtp = async (req: Request, res: Response) => {
 export const newPassswordAfterOTPVerified = async (req: Request, res: Response) => {
 	try {
 		const response = await newPassswordAfterOTPVerifiedService(req.body, res);
+		return res.status(httpStatusCode.OK).json(response);
+	} catch (error: any) {
+		const { code, message } = errorParser(error);
+		return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
+	}
+};
+export const verifyReferralCode = async (req: Request, res: Response) => {
+	try {
+		const response = await verifyReferralCodeService(req.body, res);
 		return res.status(httpStatusCode.OK).json(response);
 	} catch (error: any) {
 		const { code, message } = errorParser(error);

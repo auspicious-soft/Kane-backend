@@ -4,9 +4,11 @@ import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { queryBuilder } from "../../utils";
 import { usersModel } from "../../models/users/users-schema";
-import { of, type } from "./../../../node_modules/next/dist/compiled/webpack/bundle5";
 import { offersHistoryModel } from "./../../models/offers-history/offers-history-schema";
 import { pointsHistoryModel } from "./../../models/points-history/points-history-schema";
+import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
+import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
+import { referralHistoryModel } from "../../models/referral-history/referral-history-schema";
 
 // Get All Users
 export const getAllUsersService = async (payload: any) => {
@@ -88,12 +90,15 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 		history = await pointsHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("restaurantId");
 	} else if (payload.type === "offer") {
 		totalHistory = await offersHistoryModel.countDocuments(query);
-		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate({
-    path: "offerId",
-    populate: [
-	  { path: "restaurantId", select: { restaurantName: 1 , image: 1} },
-    ],
-  });
+		history = await offersHistoryModel
+			.find(query)
+			.sort({ createdAt: -1 })
+			.skip(offset)
+			.limit(limit)
+			.populate({
+				path: "offerId",
+				populate: [{ path: "restaurantId", select: { restaurantName: 1, image: 1 } }],
+			});
 	} else {
 		totalHistory = await offersHistoryModel.countDocuments(query);
 		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("offerId");
@@ -113,6 +118,7 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 	};
 };
 
+
 export const getCurrentUserService = async (userData: any, res: Response) => {
 	const user = await usersModel.findById(userData.id).select("-password");
 	if (!user) {
@@ -125,7 +131,22 @@ export const getCurrentUserService = async (userData: any, res: Response) => {
 		data: user,
 	};
 };
-
+export const getUserPointHistoryService = async (userData: any, res: Response) => {
+	//TODO MONTH OR DATE FILTER FILTER
+	const user = await usersModel.findById(userData.id);
+	if (!user) {
+		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	}
+	const pointsHistory = await pointsHistoryModel.find({userId:userData.id}).populate({path:"restaurantId", select:""})
+	return {
+		success: true,
+		message: "User points history retrieved successfully",
+		data: {
+			totalPoints:user.totalPoints,
+			pointsHistory
+		},
+	};
+};
 // Update User
 export const updateUserService = async (id: string, payload: any, res: Response) => {
 	const user = await usersModel.findById(id);
@@ -199,5 +220,41 @@ export const changePasswordService = async (userDetails: any, payload: any, res:
 	return {
 		success: true,
 		message: `Password changed successfully`,
+	};
+};
+
+export const homePageService = async (userDetails: any, payload: any, res: Response) => {
+	const user = await usersModel.findById(userDetails.id);
+	if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+
+	const popularRestaurants = await RestaurantsModel.find().limit(10);
+	const offersAvailable = await RestaurantOffersModel.find().limit(10);
+
+	return {
+		success: true,
+		data: {
+			userName: user.fullName,
+			totalPoints: user.totalPoints,
+			popularRestaurants,
+			offersAvailable,
+		},
+	};
+};
+export const inviteCodeAndReferredDetailsService = async (userDetails: any, payload: any, res: Response) => {
+	const user = await usersModel.findById(userDetails.id);
+	if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	let invitedFriends: any[] = [];
+	const referralCode = user.referralCode;
+	const totalInvitedFriends = await referralHistoryModel.countDocuments({ referrer: userDetails.id });
+	if (payload.type === "invited") {
+		invitedFriends = await referralHistoryModel.find({ referrer: userDetails.id }).populate({ path: "referredUser", select: "fullName email profilePicture" });
+	}
+	return {
+		success: true,
+		data: {
+			referralCode,
+			totalInvitedFriends,
+			invitedFriends,
+		},
 	};
 };

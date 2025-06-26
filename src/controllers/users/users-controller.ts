@@ -12,6 +12,9 @@ import {
   getUserHistoryService,
   getAllBlockedUsersService,
   changePasswordService,
+  homePageService,
+  inviteCodeAndReferredDetailsService,
+  getUserPointHistoryService,
  
 } from "../../services/users/users-service";
 
@@ -73,6 +76,17 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       .json({ success: false, message: message || "An error occurred" });
   }
 };
+export const getUserPointHistory = async (req: Request, res: Response) => {
+  try {
+    const response = await getUserPointHistoryService(req.user, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
 
 // Update User
 export const updateUser = async (req: Request, res: Response) => {
@@ -113,6 +127,28 @@ export const blockUser = async (req: Request, res: Response) => {
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const response = await changePasswordService(req.user,req.body, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const userHomePage = async (req: Request, res: Response) => {
+  try {
+    const response = await homePageService(req.user,req.body, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const inviteCodeAndReferredDetails= async (req: Request, res: Response) => {
+  try {
+    const response = await inviteCodeAndReferredDetailsService(req.user,req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

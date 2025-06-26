@@ -18,6 +18,13 @@ const pointsHistorySchema = new mongoose.Schema({
       required: false,
       trim: true,
     },
+    pointsFrom:{
+      type: String,
+      enum:["REFERRAL_TO","USED_REFERRAL_CODE","SPIN","STAMPS"]
+    },
+    title:{
+      type:String,
+    },
     userId: {
       type: Types.ObjectId,
       ref: "user",

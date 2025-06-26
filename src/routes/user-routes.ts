@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { blockUser, changePassword, deleteUser, getAllUsers, getCurrentUser, getUserById, updateUser } from "../controllers/users/users-controller";
-import { createRestaurant, createRestaurantOffer, deleteRestaurant, getAllRestaurant, getAllRestaurantOffers, getRestaurantById, getRestaurantOfferById, updateRestaurant, updateRestaurantOffer } from "../controllers/restaurants/restaurants-controller";
+import {  changePassword, deleteUser, getAllUsers, getCurrentUser, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, userHomePage } from "../controllers/users/users-controller";
+import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOfferById } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
 import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
 import { createPointsHistory } from "../controllers/points-history/points-history-controller";
@@ -22,6 +22,18 @@ router.post("/points-history", createPointsHistory);
 // Settings routes
 router.put("/change-password", changePassword);
 router.get("/settings", getSettings);
+
+//Home page routes
+router.get("/home", userHomePage);
+router.get("/invite-friends", inviteCodeAndReferredDetails);
+router.get("/restaurants", getAllRestaurantForUser);
+router.get("/restaurant-offers", getAllRestaurantOfferForUser);
+router.get("/restaurant-offers/:id", getRestaurantOfferById);
+
+//user Points-History routes
+router.get("/points-history", getUserPointHistory);
+
+
 
 
 export { router };

@@ -9,7 +9,7 @@ import { checkValidAdminRole } from "./utils"
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import { checkAuth, checkWebAuth } from "./middleware/check-auth"
-import { forgotPassword, login, logout, newPassswordAfterOTPVerified, resendOtp, signup, verifyOtpPasswordReset, verifyOtpSignup } from "./controllers/auth/auth-controller"
+import { forgotPassword, login, logout, newPassswordAfterOTPVerified, resendOtp, signup, verifyOtpPasswordReset, verifyOtpSignup, verifyReferralCode } from "./controllers/auth/auth-controller"
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url) // <-- Define __filename
@@ -53,13 +53,14 @@ app.get("/", (_, res: any) => {
     res.send("Hello world entry point 🚀✅");
 });
 
-app.use("/api/admin", checkValidAdminRole, checkWebAuth, admin);
+app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
 
 //adminAuth routes
 app.post("/api/login", login)
 app.post("/api/logout", logout)
 app.post("/api/verify-otp", verifyOtpPasswordReset)
+app.post("/api/verify-referral-code", verifyReferralCode)
 app.post("/api/signup/verify-otp", verifyOtpSignup)
 app.post("/api/forgot-password", forgotPassword)
 app.patch("/api/new-password-otp-verified", newPassswordAfterOTPVerified)
