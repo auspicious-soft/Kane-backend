@@ -135,8 +135,8 @@ export const getTopLeadersService = async (payload: any, res: Response) => {
 	const page = parseInt(payload.page as string) || 1;
 	const limit = parseInt(payload.limit as string) || 10;
 	const offset = (page - 1) * limit;
-	const totalTopLeaders = await usersModel.countDocuments({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false })
-	const topLeaders = await usersModel.find({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false }).select("-password").sort({ totalPoints: -1 }).skip(offset).limit(limit);
+	const totalTopLeaders = await usersModel.countDocuments({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false, totalPoints: { $ne: 0 } })
+	const topLeaders = await usersModel.find({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false , totalPoints: { $ne: 0 }}).select("-password").sort({ totalPoints: -1 }).skip(offset).limit(limit);
 	return {
 		success: true,
 		message: "User retrieved successfully",
