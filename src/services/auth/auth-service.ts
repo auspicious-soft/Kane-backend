@@ -29,7 +29,10 @@ export const loginService = async (payload: any, res: Response) => {
 		}
 	}
 	if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
-	if (user.isDeleted === true) return errorResponseHandler("User account is deleted", httpStatusCode.FORBIDDEN, res);
+	if (user.isDeleted === true) return errorResponseHandler("User Not Found", httpStatusCode.FORBIDDEN, res);
+	if (userType === "user" && user.isBlocked) {
+		return errorResponseHandler("User account is suspended", httpStatusCode.FORBIDDEN, res);
+	}
 	if (userType === "user" && !user.isVerified) {
 		const existingToken = await passwordResetTokenModel.findOne({ email });
 		if (existingToken) {
@@ -121,7 +124,7 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 	);
 	const updatedReferredUser = await usersModel.findById(newUserId);
 	if (updatedReferredUser) {
-	await updatePointsAndMoney(updatedReferredUser._id, updatedReferredUser.valuePerPoint, updatedReferredUser.totalPoints);
+		await updatePointsAndMoney(updatedReferredUser._id, updatedReferredUser.valuePerPoint, updatedReferredUser.totalPoints);
 	}
 	await pointsHistoryModel.create({ pointsFrom: "USED_REFERRAL_CODE", title: `Used referral code.`, userId: newUserId, points: REFERRED_USER_POINTS, type: "earn" });
 
@@ -146,7 +149,7 @@ export const signupService = async (payload: any, res: Response) => {
 	// Hash password and create new user
 	const hashedPassword = await bcrypt.hash(password, 10);
 	const newUser = await usersModel.create({ ...payload, password: hashedPassword });
-generateBarcode(newUser.identifier)
+	generateBarcode(newUser.identifier);
 	const userObject = newUser.toObject() as typeof newUser & { password?: string };
 	if ("password" in userObject) {
 		delete userObject.password;

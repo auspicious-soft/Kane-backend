@@ -128,7 +128,7 @@ export const getCurrentUserService = async (userData: any, res: Response) => {
 	return {
 		success: true,
 		message: "User retrieved successfully",
-		data: user,
+		data: {user :user},
 	};
 };
 export const getTopLeadersService = async (payload: any, res: Response) => {
