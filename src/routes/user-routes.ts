@@ -12,7 +12,7 @@ router.get("/current-user", getCurrentUser);
 
 //Settings Routes
 router.delete("/delete-account/:id", deleteUser);
-router.put("/update-profile/:id", updateUser);
+router.patch("/update-profile/:id", updateUser);
 router.post("/logout", logout);
 
 //  //restaurants ROUTES

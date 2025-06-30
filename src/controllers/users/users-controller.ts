@@ -92,7 +92,7 @@ export const getUserPointHistory = async (req: Request, res: Response) => {
 // Update User
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const response = await updateUserService(req.params.id, req.body, res);
+    const response = await updateUserService(req.params.id, req.body,req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

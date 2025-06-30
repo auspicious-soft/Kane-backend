@@ -1,18 +1,11 @@
 import { Request, Response } from "express";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
-import {
-  createOfferHistoryService,
-  getAllOfferHistoriesService,
-  getOfferHistoryByIdService,
-  updateOfferHistoryService,
-  deleteOfferHistoryService,
-} from "../../services/offers-history/offers-history-service";
+import { createAchievementsService, deleteAchievementService, getAchievementsByIdService, getAllAchievementsService, updateAchievementService } from "../../services/achievements/achievements-service";
 
-// Create Offer History
-export const createOfferHistory = async (req: Request, res: Response) => {
+export const createAchievement = async (req: Request, res: Response) => {
   try {
-    const response = await createOfferHistoryService(req.body, res);
+    const response = await createAchievementsService(req.body, res);
     return res.status(httpStatusCode.CREATED).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -22,10 +15,9 @@ export const createOfferHistory = async (req: Request, res: Response) => {
   }
 };
 
-// Get All Offer Histories
-export const getAllOfferHistories = async (req: Request, res: Response) => {
+export const getAllAchievements = async (req: Request, res: Response) => {
   try {
-    const response = await getAllOfferHistoriesService(res);
+    const response = await getAllAchievementsService(res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -35,10 +27,9 @@ export const getAllOfferHistories = async (req: Request, res: Response) => {
   }
 };
 
-// Get Offer History by ID
-export const getOfferHistoryById = async (req: Request, res: Response) => {
+export const getAchievementById = async (req: Request, res: Response) => {
   try {
-    const response = await getOfferHistoryByIdService(req.params.id, res);
+    const response = await getAchievementsByIdService(req.params.id, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -48,10 +39,9 @@ export const getOfferHistoryById = async (req: Request, res: Response) => {
   }
 };
 
-// Update Offer History
-export const updateOfferHistory = async (req: Request, res: Response) => {
+export const updateAchievement = async (req: Request, res: Response) => {
   try {
-    const response = await updateOfferHistoryService(req.params.id, req.body, res);
+    const response = await updateAchievementService(req.params.id, req.body, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -61,10 +51,9 @@ export const updateOfferHistory = async (req: Request, res: Response) => {
   }
 };
 
-// Delete Offer History
-export const deleteOfferHistory = async (req: Request, res: Response) => {
+export const deleteAchievement = async (req: Request, res: Response) => {
   try {
-    const response = await deleteOfferHistoryService(req.params.id, res);
+    const response = await deleteAchievementService(req.params.id, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

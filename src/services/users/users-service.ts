@@ -166,23 +166,18 @@ export const getUserPointHistoryService = async (userData: any, res: Response) =
 	};
 };
 // Update User
-export const updateUserService = async (id: string, payload: any, res: Response) => {
+export const updateUserService = async (id: string, payload: any,query: any, res: Response) => {
 	const user = await usersModel.findById(id);
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-
-	// // If updating password, hash it
-	// if (payload.password) {
-	// 	payload.password = await bcrypt.hash(payload.password, 10);
-	// }
-
-	// // If updating email, set verification status to false
-	// if (payload.email && payload.email !== user.email) {
-	// 	payload.isVerified = false;
-	// }
-
-	const updatedUser = await usersModel.findByIdAndUpdate(id, payload, { new: true }).select("-password");
+	let updatedUser;
+    if(query.type === "leaderPrivacy"){
+		 updatedUser = await usersModel.findByIdAndUpdate(id, {topLeaderPrivacy:payload.topLeaderPrivacy}, { new: true }).select("-password");
+	}
+	else{
+		updatedUser = await usersModel.findByIdAndUpdate(id, payload, { new: true }).select("-password");
+	}
 
 	return {
 		success: true,
