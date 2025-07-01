@@ -8,8 +8,6 @@ export const createUpdateSettings = async (
   res: Response
 ) => {
     const { ...updateFields } = payload;
-    console.log('updateFields: ', updateFields);
-    console.log('payload: ', payload);
 
     const checkExist = await settingModel.findOne({ isActive: true });
     let result;

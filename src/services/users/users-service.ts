@@ -9,7 +9,6 @@ import { pointsHistoryModel } from "./../../models/points-history/points-history
 import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { referralHistoryModel } from "../../models/referral-history/referral-history-schema";
-import mongoose from "mongoose";
 
 // Get All Users
 export const getAllUsersService = async (payload: any) => {

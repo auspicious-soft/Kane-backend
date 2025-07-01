@@ -4,6 +4,7 @@ import { createRestaurant, createRestaurantOffer, deleteRestaurant, getAllRestau
 import { createSettings, getSettings } from "../controllers/settings/settings-controller";
 import { dashboardForAdmin } from "../controllers/admin/admin-controller";
 import { createAchievement, deleteAchievement, getAchievementById, getAllAchievements, updateAchievement } from "../controllers/achievements/achievements-controller";
+import { createCoupons, deleteCoupons, getAllCoupons, getCouponsById, updateCoupons } from "../controllers/coupons/coupons-controller";
 
 const router = Router();
 //restaurants ROUTES
@@ -32,6 +33,13 @@ router.get("/achievements", getAllAchievements);
 router.get("/achievements/:id", getAchievementById);
 router.put("/achievements/:id", updateAchievement);
 router.delete("/achievements/:id", deleteAchievement);
+
+//coupons ROUTES
+router.post("/coupons", createCoupons);
+router.get("/coupons", getAllCoupons);
+router.get("/coupons/:id", getCouponsById);
+router.put("/coupons/:id", updateCoupons);
+router.delete("/coupons/:id", deleteCoupons);
 
 //Settings
 router.post("/settings", createSettings);
