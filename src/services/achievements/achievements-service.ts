@@ -20,7 +20,7 @@ export const createAchievementsService = async (payload: any, res: Response) => 
 };
 
 export const getAllAchievementsService = async (res: Response) => {
-  const offerHistories = await achievementsModel.find({isActive:false}).populate("assignRestaurant");
+  const offerHistories = await achievementsModel.find({isActive:true}).populate("assignRestaurant");
   return {
     success: true,
     message: "Achievements retrieved successfully",

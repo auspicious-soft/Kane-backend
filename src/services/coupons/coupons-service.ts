@@ -12,7 +12,6 @@ export const createCouponsService = async (payload: any, res: Response) => {
 		return errorResponseHandler("Invalid expiry date", httpStatusCode.BAD_REQUEST, res);
 	}
 
-  console.log('payload: ', payload);
 	const coupons = await couponsModel.create( payload );
 	if (!coupons) {
 		return errorResponseHandler("Failed to create coupon", httpStatusCode.INTERNAL_SERVER_ERROR, res);
