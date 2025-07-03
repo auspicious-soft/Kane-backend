@@ -4,6 +4,7 @@ import { httpStatusCode } from "../../lib/constant";
 import { couponsModel } from "../../models/coupons/coupons-schema";
 
 export const createCouponsService = async (payload: any, res: Response) => {
+	console.log('payload: ', payload);
 	const { type, expiry } = payload;
 	if (!type || !["offer", "points", "percentage"].includes(type)) {
 		return errorResponseHandler("Type is invalid", httpStatusCode.BAD_REQUEST, res);

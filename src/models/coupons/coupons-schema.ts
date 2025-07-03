@@ -9,7 +9,7 @@ const couponsSchema = new mongoose.Schema(
 			unique: true,
 			default: () => identifier(),
 		},
-		orderName: {
+		offerName: {
 			type: String,
 			default: null,
 		},
