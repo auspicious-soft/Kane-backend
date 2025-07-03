@@ -13,6 +13,10 @@ const couponsSchema = new mongoose.Schema(
 			type: String,
 			default: null,
 		},
+		couponName: {
+			type: String,
+			// required: true
+		},
 		percentage: {
 			type: Number,
 			default: null,
