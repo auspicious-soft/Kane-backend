@@ -1,5 +1,6 @@
 import { Response } from "express";
 import bcrypt from "bcryptjs";
+import { Readable } from "stream";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { queryBuilder } from "../../utils";
@@ -9,6 +10,8 @@ import { pointsHistoryModel } from "./../../models/points-history/points-history
 import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { referralHistoryModel } from "../../models/referral-history/referral-history-schema";
+import { createS3Client } from "../../config/s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 // Get All Users
 export const getAllUsersService = async (payload: any) => {
@@ -315,4 +318,34 @@ export const updatePointsAndMoney = async (userId: any, valuePerPoint: any, tota
 	} catch (error) {
 		throw new Error(`Failed to update points and money: ${error.message}`);
 	}
+};
+
+export const uploadStreamToS3Service = async (
+  fileStream: Readable,
+  fileName: string,
+  fileType: string,
+  userEmail: string
+): Promise<string> => {
+  const timestamp = Date.now();
+  const imageKey = `users/${userEmail}/images/${timestamp}-${fileName}`;
+
+  // Convert stream to buffer
+  const chunks: any[] = [];
+  for await (const chunk of fileStream) {
+    chunks.push(chunk);
+  }
+  const fileBuffer = Buffer.concat(chunks);
+
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: imageKey,
+    Body: fileBuffer,
+    ContentType: fileType,
+  };
+
+  const s3Client = createS3Client();
+  const command = new PutObjectCommand(params);
+  await s3Client.send(command);
+
+  return imageKey;
 };

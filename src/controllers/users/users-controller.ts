@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
-import { errorParser } from "../../lib/errors/error-response-handler";
+import { errorParser, errorResponseHandler, formatErrorResponse } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
+import Busboy from "busboy";
+import { Readable } from "stream";
 import {
 
   getAllUsersService,
@@ -16,6 +18,7 @@ import {
   inviteCodeAndReferredDetailsService,
   getUserPointHistoryService,
   getTopLeadersService,
+  uploadStreamToS3Service,
  
 } from "../../services/users/users-service";
 
@@ -170,4 +173,74 @@ export const inviteCodeAndReferredDetails= async (req: Request, res: Response) =
   }
 };
 
-
+export const uploadUserImageController = async (req: Request, res: Response) => {
+  try {
+    const userData = req.user as any;
+    const userEmail = userData.email || req.query.email as string;
+    
+    if (!userEmail) {
+      return errorResponseHandler('User email is required', httpStatusCode.BAD_REQUEST, res);
+    }
+    
+    // Check content type
+    if (!req.headers['content-type']?.includes('multipart/form-data')) {
+      return errorResponseHandler('Content-Type must be multipart/form-data', httpStatusCode.BAD_REQUEST, res);
+    }
+    const busboy = Busboy({ headers: req.headers });
+    let uploadPromise: Promise<string> | null = null;
+    
+    busboy.on('file', async (fieldname: string, fileStream: any, fileInfo: any) => {
+      if (fieldname !== 'image') {
+        fileStream.resume(); // Skip this file
+        return;
+      }
+      
+      const { filename, mimeType } = fileInfo;
+      
+      // Create a readable stream from the file stream
+      const readableStream = new Readable();
+      readableStream._read = () => {}; // Required implementation
+      
+      fileStream.on('data', (chunk :any) => {
+        readableStream.push(chunk);
+      });
+      
+      fileStream.on('end', () => {
+        readableStream.push(null); // End of stream
+      });
+      
+      uploadPromise = uploadStreamToS3Service(
+        readableStream,
+        filename,
+        mimeType,
+        userEmail
+      );
+    });
+    
+    busboy.on('finish', async () => {
+      if (!uploadPromise) {
+        return res.status(httpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: 'No image file found in the request'
+        });
+      }
+      
+      try {
+        const imageKey = await uploadPromise;
+        return res.status(httpStatusCode.OK).json({
+          success: true,
+          message: 'Image uploaded successfully',
+          data: { imageKey }
+        });
+      } catch (error) {
+        console.error('Upload error:', error);
+        return formatErrorResponse(res, error);
+      }
+    });
+    
+    req.pipe(busboy);
+  } catch (error) {
+    console.error('Upload error:', error);
+    return formatErrorResponse(res, error);
+  }
+};
