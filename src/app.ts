@@ -33,9 +33,17 @@ app.use(express.urlencoded({ extended: true }));
 //   credential: admin.credential.cert(serviceAccount),
 // });
 
+// app.use(
+//     cors({
+//         origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || 'https://admin.oliversgroup.co.uk' : 'http://localhost:3000',
+//         methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
+//         credentials: true,
+//     })
+// );
+
 app.use(
     cors({
-        origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || 'https://admin.oliversgroup.co.uk' : 'http://localhost:3000',
+        origin: "*",
         methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
         credentials: true,
     })
