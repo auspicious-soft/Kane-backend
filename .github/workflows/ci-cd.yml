@@ -81,6 +81,8 @@ jobs:
               -e AWS_REGION='${{ secrets.AWS_REGION }}' \
               -e AWS_SECRET_ACCESS_KEY='${{ secrets.AWS_SECRET_ACCESS_KEY }}' \
               -e AWS_BUCKET_NAME='${{ secrets.AWS_BUCKET_NAME }}' \
+              -e FRONTEND_URL='${{ secrets.FRONTEND_URL }}' \
+              -e NODE_ENV='${{ secrets.NODE_ENV }}' \
               ${{ secrets.DOCKER_USERNAME }}/olivers-backend:latest || { echo 'Docker run failed'; exit 1; }
 
             echo 'Container running successfully'
