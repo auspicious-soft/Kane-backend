@@ -45,6 +45,7 @@ export const getAchievementsByIdService = async (achievementId: string, res: Res
   };
 };
 
+
 export const updateAchievementService = async (achievementId: string, payload: any, res: Response) => {
   if (!achievementId) {
     return errorResponseHandler("Achievement ID is required", httpStatusCode.BAD_REQUEST, res);

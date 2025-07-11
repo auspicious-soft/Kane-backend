@@ -107,6 +107,10 @@ const userSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		barCode:{
+			type: String,
+			default:null
+		}
 	},
 	{ timestamps: true }
 );

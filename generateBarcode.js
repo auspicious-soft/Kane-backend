@@ -36,8 +36,8 @@ import { writeFileSync } from 'fs';
 
 // User details
 const user = {
-   // ID from the image
-  _id:"8734y95498",
+  // ID from the image
+  _id: "8734y95498",
 };
 const barcodeText = `_ID: ${user._id}`;
 // Generate barcode as PNG

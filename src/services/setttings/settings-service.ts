@@ -21,11 +21,12 @@ export const createUpdateSettings = async (
       );
 
       if (!result) {
-        return errorResponseHandler(
-          "Admin settings not found",
-          httpStatusCode.NOT_FOUND,
-          res
-        );
+        // return errorResponseHandler(
+        //   "Admin settings not found",
+        //   httpStatusCode.NOT_FOUND,
+        //   res
+        // );
+        result:[]
       }
     } else {
       // Create new settings
@@ -47,11 +48,16 @@ export const getSettingsService = async (payload:any, res: Response) => {
     let policy;
     let message;
     if (!settings) {
-      return errorResponseHandler(
-        "Admin settings not found",
-        httpStatusCode.NOT_FOUND,
-        res
-      );
+      // return errorResponseHandler(
+      //   "Admin settings not found",
+      //   httpStatusCode.NOT_FOUND,
+      //   res
+      // );
+      return {
+      success: true,
+      message: `Settings retrieved successfully`,
+      data: policy,
+    };
     }
     if(payload.type === "support"){
       policy = settings.helpAndSupport

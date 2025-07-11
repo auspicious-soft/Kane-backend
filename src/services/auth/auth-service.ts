@@ -149,7 +149,16 @@ export const signupService = async (payload: any, res: Response) => {
 	// Hash password and create new user
 	const hashedPassword = await bcrypt.hash(password, 10);
 	const newUser = await usersModel.create({ ...payload, password: hashedPassword });
-	generateBarcode(newUser.identifier);
+    const barcodeKey = await generateBarcode(newUser.identifier, payload.email);
+
+  // Update user with barcode key
+  await usersModel.updateOne(
+    { _id: newUser._id },
+    { $set: { barCode :barcodeKey } }
+  );
+
+  // Retrieve updated user
+//   const updatedUser = await usersModel.findById(newUser._id).lean();
 	const userObject = newUser.toObject() as typeof newUser & { password?: string };
 	if ("password" in userObject) {
 		delete userObject.password;
