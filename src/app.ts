@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
     cors({
-        origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || 'https://api.oliversgroup.co.uk' : 'http://localhost:3000',
+        origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || 'https://admin.oliversgroup.co.uk' : 'http://localhost:3000',
         methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
         credentials: true,
     })
