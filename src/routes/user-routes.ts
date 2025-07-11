@@ -4,7 +4,6 @@ import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOf
 import { logout } from "../controllers/auth/auth-controller";
 import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
 import { createPointsHistory } from "../controllers/points-history/points-history-controller";
-import { getSettings } from "../controllers/settings/settings-controller";
 
 const router = Router();
 //current User ROUTES
@@ -21,7 +20,6 @@ router.post("/points-history", createPointsHistory);
 
 // Settings routes
 router.put("/change-password", changePassword);
-router.get("/settings", getSettings);
 
 //Home page routes
 router.get("/home", userHomePage);

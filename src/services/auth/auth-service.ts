@@ -89,7 +89,7 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 
 	const referrer = await usersModel.findOne({ referralCode: referralCode });
 	if (!referrer) {
-		return errorResponseHandler("Referrer NOT FOUND", httpStatusCode.NOT_FOUND, res);
+		return errorResponseHandler("Invalid Referral Code", httpStatusCode.BAD_REQUEST, res);
 	}
 
 	// Create referral history
@@ -354,7 +354,7 @@ export const logoutService = async (userId: any, res: Response) => {
 export const verifyReferralCodeService = async (payload: any, res: Response) => {
 	const validReferralCode = await usersModel.findOne({ referralCode: payload.referralCode });
 	if (!validReferralCode) {
-		return errorResponseHandler("Invalid Referral Code", httpStatusCode.NOT_FOUND, res);
+		return errorResponseHandler("Invalid Referral Code", httpStatusCode.BAD_REQUEST, res);
 	}
 	return {
 		success: true,
