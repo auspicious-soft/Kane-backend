@@ -41,10 +41,17 @@ export const getAllBlockedUsersService = async (payload: any) => {
 	const limit = parseInt(payload.limit as string) || 10;
 	const offset = (page - 1) * limit;
 
-	// Get search query from queryBuilder
-	let { query, sort } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
+	let { query, sort } = queryBuilder(payload, [
+    "fullName",
+    "email",
+    "firstName",
+    "lastName",
+  ]);
 
-	const totalUsers = await usersModel.countDocuments(query, { isBlocked: true });
+ 
+  const finalQuery = { ...query, isBlocked: true } as Record<string, any>;
+
+  const totalUsers = await usersModel.countDocuments(finalQuery);
 	const users = await usersModel
 		.find({ isBlocked: true, ...query })
 		.sort(sort)
