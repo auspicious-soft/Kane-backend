@@ -74,12 +74,12 @@ export const deleteAchievementService = async (achievementId: string, res: Respo
   const deletedAchievement = await achievementsModel.findByIdAndUpdate(achievementId, {isActive:false});
 
   if (!deletedAchievement) {
-    return errorResponseHandler("Offer history not found", httpStatusCode.NOT_FOUND, res);
+    return errorResponseHandler("Achievement not found", httpStatusCode.NOT_FOUND, res);
   }
 
   return {
     success: true,
-    message: "Offer history deleted successfully",
+    message: "Achievement deleted successfully",
     data: deletedAchievement
   };
 };
