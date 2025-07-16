@@ -36,7 +36,7 @@ export const createRestaurantService = async (payload: any, res: Response) => {
 	};
 };
 export const getAllRestaurantService = async (payload: any, res: Response) => {
-	const restaurants = await RestaurantsModel.find({ isDeleted: false });
+	const restaurants = await RestaurantsModel.find({ isDeleted: false }).sort({ createdAt: -1 });
 
 	// Get offer counts for all restaurants
 	const offerCounts = await RestaurantOffersModel.aggregate([{ $group: { _id: "$restaurantId", count: { $sum: 1 } } }]);

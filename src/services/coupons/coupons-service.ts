@@ -25,7 +25,9 @@ export const createCouponsService = async (payload: any, res: Response) => {
 };
 
 export const getAllCouponsService = async (res: Response) => {
-	const coupons = await couponsModel.find({ isActive: true });
+	 const coupons = await couponsModel
+    .find({ isActive: true })
+    .sort({ createdAt: -1 });
 	return {
 		success: true,
 		message: "Coupons retrieved successfully",
