@@ -6,14 +6,15 @@ import { usersModel } from "../../models/users/users-schema";
 
 
 export const createOfferHistoryService = async (payload: any, res: Response) => {
-  const { userId, offerId, type } = payload;
+  const { userId, offerId, type, freeItem } = payload;
   if (!userId || !offerId || !type || !["earn", "redeem"].includes(type)) {
     return errorResponseHandler("All offer history fields are required", httpStatusCode.BAD_REQUEST, res);
   }
   const offerHistory = await offersHistoryModel.create({
     userId,
     offerId,
-    type
+    type,
+    freeItem
   });
   if (!offerHistory) {
     return errorResponseHandler("Failed to create offer history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
