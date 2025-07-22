@@ -24,7 +24,7 @@ const offersHistorySchema = new mongoose.Schema({
       enum: ["earn", "redeem"],
       required: true,
     },
-    freeeItems: {
+    freeItem: {
       type: String,
       },
   },
