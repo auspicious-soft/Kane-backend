@@ -35,31 +35,70 @@ export const createRestaurantService = async (payload: any, res: Response) => {
 		data: restaurant,
 	};
 };
+// export const getAllRestaurantService = async (payload: any, res: Response) => {
+// 	const restaurants = await RestaurantsModel.find({ isDeleted: false }).sort({ createdAt: -1 });
+
+// 	// Get offer counts for all restaurants
+// 	const offerCounts = await RestaurantOffersModel.aggregate([{ $group: { _id: "$restaurantId", count: { $sum: 1 } } }]);
+
+// 	// Map offer counts to a dictionary for quick lookup
+// 	const offerCountMap: Record<string, number> = {};
+// 	offerCounts.forEach((item: any) => {
+// 		offerCountMap[item._id.toString()] = item.count;
+// 	});
+
+// 	// Attach offer count to each restaurant
+// 	const restaurantsWithOffers = restaurants.map((restaurant: any) => ({
+// 		...restaurant.toObject(),
+// 		offerCount: offerCountMap[restaurant._id.toString()] || 0,
+// 	}));
+
+// 	return {
+// 		success: true,
+// 		message: "Restaurants retrieved successfully",
+// 		data: restaurantsWithOffers,
+// 	};
+// };
+
 export const getAllRestaurantService = async (payload: any, res: Response) => {
-	const restaurants = await RestaurantsModel.find({ isDeleted: false }).sort({ createdAt: -1 });
+    const page = parseInt(payload.page as string) || 1;
+    const limit = parseInt(payload.limit as string) || 10;
+    const offset = (page - 1) * limit;
 
-	// Get offer counts for all restaurants
-	const offerCounts = await RestaurantOffersModel.aggregate([{ $group: { _id: "$restaurantId", count: { $sum: 1 } } }]);
+    const totalRestaurants = await RestaurantsModel.countDocuments({ isDeleted: false });
+    const restaurants = await RestaurantsModel.find({ isDeleted: false })
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit);
 
-	// Map offer counts to a dictionary for quick lookup
-	const offerCountMap: Record<string, number> = {};
-	offerCounts.forEach((item: any) => {
-		offerCountMap[item._id.toString()] = item.count;
-	});
+    // Get offer counts for all restaurants
+    const offerCounts = await RestaurantOffersModel.aggregate([
+        { $group: { _id: "$restaurantId", count: { $sum: 1 } } }
+    ]);
 
-	// Attach offer count to each restaurant
-	const restaurantsWithOffers = restaurants.map((restaurant: any) => ({
-		...restaurant.toObject(),
-		offerCount: offerCountMap[restaurant._id.toString()] || 0,
-	}));
+    // Map offer counts to a dictionary for quick lookup
+    const offerCountMap: Record<string, number> = {};
+    offerCounts.forEach((item: any) => {
+        offerCountMap[item._id.toString()] = item.count;
+    });
 
-	return {
-		success: true,
-		message: "Restaurants retrieved successfully",
-		data: restaurantsWithOffers,
-	};
+    // Attach offer count to each restaurant
+    const restaurantsWithOffers = restaurants.map((restaurant: any) => ({
+        ...restaurant.toObject(),
+        offerCount: offerCountMap[restaurant._id.toString()] || 0,
+    }));
+
+    return {
+        success: true,
+        message: "Restaurants retrieved successfully",
+        data: {
+            restaurants: restaurantsWithOffers,
+            page,
+            limit,
+            total: totalRestaurants,
+        },
+    };
 };
-
 export const getRestaurantByIdService = async (restaurantId: any, res: Response) => {
 	if (!restaurantId) {
 		return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);

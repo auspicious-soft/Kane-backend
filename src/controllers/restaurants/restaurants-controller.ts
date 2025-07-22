@@ -18,7 +18,7 @@ export const createRestaurant = async (req: Request, res: Response) => {
 
 export const getAllRestaurant = async (req: Request, res: Response) => {
   try {
-    const response = await getAllRestaurantService(req.body, res);
+    const response = await getAllRestaurantService(req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
