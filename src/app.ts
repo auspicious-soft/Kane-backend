@@ -3,7 +3,7 @@ import cors from "cors"
 import path from "path"
 import { fileURLToPath } from 'url'
 import connectDB from "./config/db"
-import { admin, user } from "./routes"
+import { admin, epos, user } from "./routes"
 // import admin from "firebase-admin"
 import { checkValidAdminRole } from "./utils"
 import bodyParser from 'body-parser'
@@ -65,7 +65,7 @@ app.get("/", (_, res: any) => {
 app.get("/api/user/settings", getSettings);
 app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
-
+app.use("/api/epos", epos);
 //adminAuth routes
 app.post("/api/login", login)
 app.post("/api/logout", logout)
