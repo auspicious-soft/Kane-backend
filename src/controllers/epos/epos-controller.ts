@@ -15,7 +15,7 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
   }
 
   try {
-    const newCustomer = await eposNowService.createData('Customer', data);
+    const newCustomer = await eposNowService.createData('CustomerPoints', data);
     res.status(201).json(newCustomer);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create customer' });
@@ -23,7 +23,6 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
 };
 export const getCustomers = async (req: Request, res: Response): Promise<void> => {
   const page = parseInt(req.query.page as string) || 1;
-
   try {
     const customers = await eposNowService.getData('Customer', page);
     res.json(customers);
@@ -75,6 +74,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
  */
 export const deleteCustomer = async (req: Request, res: Response): Promise<void> => {
   const data = req.body;
+  console.log('data: ', data);
   try {
     const result = await eposNowService.deleteData('Customer', data);
     res.json({ message: `Customer with ID deleted successfully`, result });

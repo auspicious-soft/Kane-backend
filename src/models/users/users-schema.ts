@@ -110,6 +110,10 @@ const userSchema = new mongoose.Schema(
 		barCode:{
 			type: String,
 			default:null
+		},
+		eposId: {
+			type: String,
+			default: null
 		}
 	},
 	{ timestamps: true }

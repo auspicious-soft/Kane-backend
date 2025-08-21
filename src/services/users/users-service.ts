@@ -12,7 +12,9 @@ import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant
 import { referralHistoryModel } from "../../models/referral-history/referral-history-schema";
 import { createS3Client } from "../../config/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { createEposNowService } from "../epos/epos-service";
 
+const eposNowService = createEposNowService();
 // Get All Users
 export const getAllUsersService = async (payload: any) => {
 	const page = parseInt(payload.page as string) || 1;
@@ -185,7 +187,18 @@ export const updateUserService = async (id: string, payload: any,query: any, res
 		 updatedUser = await usersModel.findByIdAndUpdate(id, {topLeaderPrivacy:payload.topLeaderPrivacy}, { new: true }).select("-password");
 	}
 	else{
+
 		updatedUser = await usersModel.findByIdAndUpdate(id, payload, { new: true }).select("-password");
+		const updatedCustomer = await eposNowService.updateData('Customer', [
+			{
+				"Id": user.eposId,
+				"EmailAddress": updatedUser.email?.toString(),
+				"ContactNumber": updatedUser.phoneNumber?.toString(),
+				"Forename": updatedUser.fullName?.toString(),
+				"Title": updatedUser.gender === "male" ? 1 : 3,
+				"SignUpDate": updatedUser.createdAt
+			}
+		]);
 	}
 
 	return {
@@ -202,7 +215,14 @@ export const deleteUserService = async (id: string, res: Response) => {
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-
+	console.log('user.eposId: ', user.eposId);
+	if (user.eposId) {
+		const result = await eposNowService.deleteData('Customer', [
+    {
+        "Id": parseInt(user.eposId, 10)
+    }
+]);
+	}
 	await usersModel.findByIdAndUpdate(id, { isDeleted: true });
 
 	return {
