@@ -41,6 +41,10 @@ const restaurantOffersSchema = new mongoose.Schema({
     isActive:{
       type:Boolean,
       default:true
+    },
+    points:{
+      type:Number,
+      default:0
     }
   },
   { timestamps: true }

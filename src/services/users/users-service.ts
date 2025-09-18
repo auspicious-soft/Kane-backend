@@ -189,6 +189,12 @@ export const updateUserService = async (id: string, payload: any,query: any, res
 	else{
 
 		updatedUser = await usersModel.findByIdAndUpdate(id, payload, { new: true }).select("-password");
+		if (updatedUser === null) {
+		  return {
+			success: false,
+			message: "User not found",
+		  };
+		}
 		const updatedCustomer = await eposNowService.updateData('Customer', [
 			{
 				"Id": user.eposId,
@@ -200,7 +206,6 @@ export const updateUserService = async (id: string, payload: any,query: any, res
 			}
 		]);
 	}
-
 	return {
 		success: true,
 		message: "User updated successfully",
@@ -342,7 +347,7 @@ export const updatePointsAndMoney = async (userId: any, valuePerPoint: any, tota
 			totalPoints: updatedUser.totalPoints,
 			totalMoneyEarned: updatedUser.totalMoneyEarned,
 		};
-	} catch (error) {
+	} catch (error: any) {
 		throw new Error(`Failed to update points and money: ${error.message}`);
 	}
 };

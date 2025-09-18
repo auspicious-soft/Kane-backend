@@ -4,6 +4,7 @@ import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOf
 import { logout } from "../controllers/auth/auth-controller";
 import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
 import { createPointsHistory } from "../controllers/points-history/points-history-controller";
+import { createCouponsHistory } from "../controllers/coupons-history/coupons-history-controller";
 
 const router = Router();
 //current User ROUTES
@@ -16,6 +17,7 @@ router.post("/logout", logout);
 
 //  //restaurants ROUTES
 router.post("/offer-history", createOfferHistory);
+router.post("/coupon-history", createCouponsHistory);
 router.post("/points-history", createPointsHistory);
 
 // Settings routes

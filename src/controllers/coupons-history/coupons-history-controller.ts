@@ -1,19 +1,12 @@
 import { Request, Response } from "express";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
-import {
-  createOfferHistoryService,
-  getAllOfferHistoriesService,
-  getOfferHistoryByIdService,
-  updateOfferHistoryService,
-  deleteOfferHistoryService,
-  getUserOfferHistoryService,
-} from "../../services/offers-history/offers-history-service";
+import { createCouponsHistoryService, deleteCouponHistoryService, getAllCouponHistoriesService, getCouponHistoryByIdService, getUserCouponHistoryService, postApplyUserCouponService, updateCouponHistoryService } from "../../services/coupons-history/coupons-history-service";
 
-// Create Offer History
-export const createOfferHistory = async (req: Request, res: Response) => {
+// Create Coupon History
+export const createCouponsHistory = async (req: Request, res: Response) => {
   try {
-    const response = await createOfferHistoryService(req.body, res);
+    const response = await createCouponsHistoryService(req.body, res);
     return res.status(httpStatusCode.CREATED).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -23,10 +16,10 @@ export const createOfferHistory = async (req: Request, res: Response) => {
   }
 };
 
-// Get All Offer Histories
-export const getAllOfferHistories = async (req: Request, res: Response) => {
+// Get All Coupon Histories
+export const getAllCouponHistories = async (req: Request, res: Response) => {
   try {
-    const response = await getAllOfferHistoriesService(res);
+    const response = await getAllCouponHistoriesService(res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -36,10 +29,10 @@ export const getAllOfferHistories = async (req: Request, res: Response) => {
   }
 };
 
-// Get Offer History by ID
-export const getOfferHistoryById = async (req: Request, res: Response) => {
+// Get Coupon History by ID
+export const getCouponHistoryById = async (req: Request, res: Response) => {
   try {
-    const response = await getOfferHistoryByIdService(req.params.id, res);
+    const response = await getCouponHistoryByIdService(req.params.id, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -49,10 +42,10 @@ export const getOfferHistoryById = async (req: Request, res: Response) => {
   }
 };
 
-// Update Offer History
-export const updateOfferHistory = async (req: Request, res: Response) => {
+// Update Coupon History
+export const updateCouponHistory = async (req: Request, res: Response) => {
   try {
-    const response = await updateOfferHistoryService(req.params.id, req.body, res);
+    const response = await updateCouponHistoryService(req.params.id, req.body, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -62,10 +55,10 @@ export const updateOfferHistory = async (req: Request, res: Response) => {
   }
 };
 
-// Delete Offer History
-export const deleteOfferHistory = async (req: Request, res: Response) => {
+// Delete Coupon History
+export const deleteCouponHistory = async (req: Request, res: Response) => {
   try {
-    const response = await deleteOfferHistoryService(req.params.id, res);
+    const response = await deleteCouponHistoryService(req.params.id, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
@@ -74,9 +67,20 @@ export const deleteOfferHistory = async (req: Request, res: Response) => {
       .json({ success: false, message: message || "An error occurred" });
   }
 };
-export const getUserOfferHistory = async (req: Request, res: Response) => {
+export const getUserCouponHistory = async (req: Request, res: Response) => {
   try {
-    const response = await getUserOfferHistoryService(req.params.id, res);
+    const response = await getUserCouponHistoryService(req.params.id, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const postApplyUserCoupon = async (req: Request, res: Response) => {
+  try {
+    const response = await postApplyUserCouponService(req.body, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

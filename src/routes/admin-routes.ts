@@ -5,6 +5,8 @@ import { createSettings, getSettings } from "../controllers/settings/settings-co
 import { dashboardForAdmin } from "../controllers/admin/admin-controller";
 import { createAchievement, deleteAchievement, getAchievementById, getAllAchievements, updateAchievement } from "../controllers/achievements/achievements-controller";
 import { createCoupons, deleteCoupons, getAllCoupons, getCouponsById, updateCoupons } from "../controllers/coupons/coupons-controller";
+import { getUserOfferHistory } from "../controllers/offers-history/offers-history-controller";
+import { getUserCouponHistory, postApplyUserCoupon } from "../controllers/coupons-history/coupons-history-controller";
 
 const router = Router();
 //restaurants ROUTES
@@ -48,6 +50,9 @@ router.get("/settings", getSettings);
 //dashboard 
 router.get("/dashboard", dashboardForAdmin);
 
-
+//user offer-history
+router.get("/offer-history/:id", getUserOfferHistory);
+router.get("/coupon-history/:id", getUserCouponHistory);
+router.post("/coupon-history/apply", postApplyUserCoupon);
 
 export { router };

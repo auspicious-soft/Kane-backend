@@ -2,7 +2,6 @@ import { Response } from "express";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
-import { usersModel } from "../../models/users/users-schema";
 
 
 export const createOfferHistoryService = async (payload: any, res: Response) => {
@@ -87,5 +86,21 @@ export const deleteOfferHistoryService = async (historyId: string, res: Response
     success: true,
     message: "Offer history deleted successfully",
     data: deletedOfferHistory
+  };
+};
+export const getUserOfferHistoryService = async (userId: string, res: Response) => {
+  if (!userId) {
+    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+  }
+  const userOfferHistory = await offersHistoryModel.find({ userId , type: "earn" }).populate('offerId');
+
+  if (!userOfferHistory) {
+    return errorResponseHandler("No offer history found for this user", httpStatusCode.NOT_FOUND, res);
+  }
+
+  return {
+    success: true,
+    message: "User offer history retrieved successfully",
+    data: userOfferHistory
   };
 };

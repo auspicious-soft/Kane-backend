@@ -25,6 +25,7 @@ export const createPointsHistoryService = async ( payload: any, res: Response) =
   user.totalPoints += pointsHistory.points;
   if (payload.type === "redeem") {
     user.redeemedPoints += pointsHistory.points;
+    user.activePoints -= pointsHistory.points;
   }
   if(payload.type === "earn") {
     user.activePoints += pointsHistory.points;
