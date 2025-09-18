@@ -89,32 +89,51 @@ const userSchema = new mongoose.Schema(
 		},
 		profilePicture: {
 			type: String,
-			default:null,
+			default: null,
 		},
 		totalMoneyEarned: {
 			type: Number,
 			default: 0,
 		},
-		currency:{
-			type:String,
-			default:"$"
+		currency: {
+			type: String,
+			default: "$",
 		},
-		valuePerPoint:{
-			type:Number,
-			default:1
+		valuePerPoint: {
+			type: Number,
+			default: 1,
 		},
 		topLeaderPrivacy: {
 			type: Boolean,
 			default: false,
 		},
-		barCode:{
+		barCode: {
 			type: String,
-			default:null
+			default: null,
 		},
 		eposId: {
 			type: String,
-			default: null
-		}
+			default: null,
+		},
+		visitData: {
+			type: [
+				{
+					totalVisits: {
+						type: Number,
+						default: 0,
+					},
+					restaurantId: {
+						type: Types.ObjectId,
+						ref: "restaurant",
+					},
+					currentVisitStreak: {
+						type: Number,
+						default: 0,
+					},
+				},
+			],
+			default: [],
+		},
 	},
 	{ timestamps: true }
 );

@@ -113,6 +113,8 @@ export const getUserCouponHistoryService = async (userId: string, res: Response)
 };
 export const postApplyUserCouponService = async (payload: any, res: Response) => {
 	const { userId, couponId } = payload;
+	console.log('payload: ', payload);
+	let pointsTobeRedeemed = 0;
 	if (!userId) {
 		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
@@ -121,16 +123,22 @@ export const postApplyUserCouponService = async (payload: any, res: Response) =>
 	if (!userCouponHistory || userCouponHistory.length === 0) {
 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
 	}
-	const pointsTobeRedeemed = userCouponHistory.reduce((acc, curr) => {
+	
+	if (userCouponHistory.some((history) => (history.couponId as any)?.expiry < new Date())) {
+		return errorResponseHandler("Coupon is expired", httpStatusCode.BAD_REQUEST, res);
+	}
+	
+	if (payload.pointsWorth) {
+		pointsTobeRedeemed = payload.pointsWorth;
+	} else {
+		pointsTobeRedeemed = userCouponHistory.reduce((acc, curr) => {
 		if (curr.type === "earn") {
 			return acc + (curr.couponId as any).points;
 		}
 		return acc;
 	}, 0);
-	if (userCouponHistory.some((history) => (history.couponId as any)?.expiry < new Date())) {
-		return errorResponseHandler("Coupon is expired", httpStatusCode.BAD_REQUEST, res);
 	}
-
+	console.log('pointsTobeRedeemed: ', pointsTobeRedeemed);
 	const updateUserPointsToBeRedeemed = await usersModel.updateOne(
 		{ _id: userId },
 		{
