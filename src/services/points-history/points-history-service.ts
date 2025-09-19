@@ -2,8 +2,6 @@ import { Response } from "express";
 import bcrypt from "bcryptjs";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
-import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
-import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { pointsHistoryModel } from "../../models/points-history/points-history-schema";
 import { usersModel } from "../../models/users/users-schema";
 

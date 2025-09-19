@@ -22,7 +22,7 @@ const achievementsSchema = new mongoose.Schema(
 			default: null,
 		},
 		rewardValue: {
-			type: String,
+			type: Number,
 			default: null,
 		},
 		assignRestaurant: {

@@ -184,6 +184,55 @@ const webhookService = {
 					console.error(`Location with ID ${locationId} not found.`);
 					return { status: "error", message: "Location not found" };
 				}
+				// const existingVisitIndex = user.visitData.findIndex((visit:any) => visit.restaurantId.toString() === restaurant._id.toString());
+
+				// if (existingVisitIndex !== -1) {
+				// 	// Update existing visitData
+				// 	user.visitData[existingVisitIndex].totalVisits += 1;
+				// 	user.visitData[existingVisitIndex].currentVisitStreak += 1;
+				// } else {
+				// 	// Add new visitData entry
+				// 	user.visitData.push({
+				// 		totalVisits: 1,
+				// 		restaurantId: restaurant._id,
+				// 		currentVisitStreak: 1,
+				// 	});
+				// }
+
+				// await user.save();
+
+				// if (existingVisitIndex !== -1) {
+				// 	// Update existing visitData
+				// 	user.visitData[existingVisitIndex].totalVisits += 1;
+				// 	user.visitData[existingVisitIndex].currentVisitStreak += 1;
+				// } else {
+				// 	// Add new visitData entry
+				// 	user.visitData.push({
+				// 		totalVisits: 1,
+				// 		restaurantId: restaurant._id,
+				// 		currentVisitStreak: 1,
+				// 	});
+				// }
+
+				// await user.save();
+
+				const existingVisitIndex = user.visitData.findIndex((visit: any) => visit.restaurantId.toString() === restaurant._id.toString());
+
+				if (existingVisitIndex !== -1) {
+					// Update existing entry
+					user.visitData[existingVisitIndex].totalVisits += 1;
+					user.visitData[existingVisitIndex].currentVisitStreak += 1;
+				} else {
+					// Create new entry
+					user.visitData.push({
+						totalVisits: 1,
+						restaurantId: restaurant._id,
+						currentVisitStreak: 1,
+					});
+				}
+
+				await user.save();
+
 				// Check for transaction-level discount (outside TransactionItems)
 				if (transaction.DiscountReasonId && transaction.DiscountValue > 0) {
 					const discountReason = await eposNowService.getDataById("DiscountReason", transaction.DiscountReasonId, "v4");
@@ -191,7 +240,7 @@ const webhookService = {
 					if (discountReason && (discountReason as any).Name === "Coupon Redemption") {
 						console.log(`Processing Coupon Redemption for Transaction ${transaction.Id}`);
 						console.log(`Discount Amount: ${transaction.DiscountValue}`);
-						user.redeemedPoints += transaction.DiscountValue;
+						// user.redeemedPoints += transaction.DiscountValue;
 						user.activePoints -= transaction.DiscountValue;
 						await user.save();
 					} else if (discountReason && (discountReason as any).Name === "Point Redemption") {
@@ -202,7 +251,6 @@ const webhookService = {
 					}
 				}
 
-				// Check for item-level discounts (inside TransactionItems)
 				if (transaction.TransactionItems && transaction.TransactionItems.length > 0) {
 					for (const item of transaction.TransactionItems) {
 						if (item.DiscountReasonId && item.DiscountAmount > 0) {
@@ -212,7 +260,7 @@ const webhookService = {
 							if (discountReason && (discountReason as any).Name === "Coupon Redemption") {
 								console.log(`Processing Coupon Redemption for TransactionItem ${item.Id}`);
 								console.log(`Discount Amount: ${item.DiscountAmount}`);
-								user.redeemedPoints += transaction.DiscountValue;
+								// user.redeemedPoints += transaction.DiscountValue;
 								user.activePoints -= transaction.DiscountValue;
 								await user.save();
 							} else if (discountReason && (discountReason as any).Name === "Points Redemption") {
