@@ -13,7 +13,9 @@ import { referralHistoryModel } from "../../models/referral-history/referral-his
 import { pointsHistoryModel } from "../../models/points-history/points-history-schema";
 import { generateBarcode } from "../../utils/generateBarcode";
 import { updatePointsAndMoney } from "../users/users-service";
+import { createEposNowService } from "../epos/epos-service";
 
+const eposNowService = createEposNowService();
 export const loginService = async (payload: any, res: Response) => {
 	const { email, password, fcmToken } = payload;
 	let user: any = null;
@@ -101,6 +103,12 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 		pointsAwardedToReferred: REFERRED_USER_POINTS,
 	});
 
+	const data = {
+		CustomerId: Number(referrer.eposId),
+		PointsToAdd: REFERRER_POINTS,
+	};
+	const referrerPoints = await eposNowService.createData("CustomerPoints", data);
+
 	// Update referrer's points and referredUsers atomically
 	await usersModel.updateOne(
 		{ _id: referrer._id },
@@ -125,10 +133,14 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 	const updatedReferredUser = await usersModel.findById(newUserId);
 	if (updatedReferredUser) {
 		await updatePointsAndMoney(updatedReferredUser._id, updatedReferredUser.valuePerPoint, updatedReferredUser.totalPoints);
+		const data1 = {
+			CustomerId: Number(updatedReferredUser.eposId),
+			PointsToAdd: REFERRED_USER_POINTS,
+		};
+		const referredPoints = await eposNowService.createData("CustomerPoints", data1);
 	}
 	await pointsHistoryModel.create({ pointsFrom: "USED_REFERRAL_CODE", title: `Used referral code.`, userId: newUserId, points: REFERRED_USER_POINTS, type: "earn" });
 
-	console.log("Referral processed for user:", newUserId);
 }
 export const signupService = async (payload: any, res: Response) => {
 	const { email, password, referralCodeSignup } = payload;
@@ -149,16 +161,23 @@ export const signupService = async (payload: any, res: Response) => {
 	// Hash password and create new user
 	const hashedPassword = await bcrypt.hash(password, 10);
 	const newUser = await usersModel.create({ ...payload, password: hashedPassword });
-    const barcodeKey = await generateBarcode(newUser.identifier, payload.email);
+	const barcodeKey = await generateBarcode(newUser.identifier, payload.email);
+	const title = payload.gender === "male" ? 1 : 3;
+	const data = [
+		{
+			EmailAddress: payload.email.toString(),
+			ContactNumber: payload.phoneNumber.toString(),
+			Forename: payload.fullName.toString(),
+			Title: title,
+		},
+	];
+	const newCustomer = (await eposNowService.createData("Customer", data)) as { Id: any }[];
 
-  // Update user with barcode key
-  await usersModel.updateOne(
-    { _id: newUser._id },
-    { $set: { barCode :barcodeKey } }
-  );
+	// Update user with barcode key
+	await usersModel.updateOne({ _id: newUser._id }, { $set: { barCode: barcodeKey, eposId: newCustomer?.map((customer) => customer.Id)[0] } });
 
-  // Retrieve updated user
-//   const updatedUser = await usersModel.findById(newUser._id).lean();
+	// Retrieve updated user
+	//   const updatedUser = await usersModel.findById(newUser._id).lean();
 	const userObject = newUser.toObject() as typeof newUser & { password?: string };
 	if ("password" in userObject) {
 		delete userObject.password;
@@ -233,7 +252,9 @@ export const verifyOtpPasswordResetService = async (token: string, res: Response
 	return { success: true, message: "OTP verified successfully" };
 };
 export const verifyOtpSignupService = async (otp: string, fcmToken: string, res: Response) => {
+	console.log('otp: ', otp);
 	const existingToken = await getPasswordResetTokenByToken(otp);
+	console.log('existingToken: ', existingToken);
 	if (!existingToken) return errorResponseHandler("Please enter valid OTP.", httpStatusCode.BAD_REQUEST, res);
 
 	const hasExpired = new Date(existingToken.expires) < new Date();

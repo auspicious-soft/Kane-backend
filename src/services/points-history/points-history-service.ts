@@ -2,8 +2,6 @@ import { Response } from "express";
 import bcrypt from "bcryptjs";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
-import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
-import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { pointsHistoryModel } from "../../models/points-history/points-history-schema";
 import { usersModel } from "../../models/users/users-schema";
 
@@ -25,6 +23,7 @@ export const createPointsHistoryService = async ( payload: any, res: Response) =
   user.totalPoints += pointsHistory.points;
   if (payload.type === "redeem") {
     user.redeemedPoints += pointsHistory.points;
+    user.activePoints -= pointsHistory.points;
   }
   if(payload.type === "earn") {
     user.activePoints += pointsHistory.points;

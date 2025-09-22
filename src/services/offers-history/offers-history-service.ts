@@ -89,3 +89,72 @@ export const deleteOfferHistoryService = async (historyId: string, res: Response
     data: deletedOfferHistory
   };
 };
+export const getUserOfferHistoryService = async (userId: string, res: Response) => {
+  if (!userId) {
+    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+  }
+  const userOfferHistory = await offersHistoryModel.find({ userId , type: "earn" }).populate('offerId');
+
+  if (!userOfferHistory) {
+    return errorResponseHandler("No offer history found for this user", httpStatusCode.NOT_FOUND, res);
+  }
+
+  return {
+    success: true,
+    message: "User offer history retrieved successfully",
+    data: userOfferHistory
+  };
+};
+
+
+export const postApplyUserOfferService = async (payload: any, res: Response) => {
+  const { userId, offerId } = payload;
+  console.log('payload: ', payload);
+  let pointsTobeRedeemed = 0;
+  if (!userId) {
+    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+  }
+  const userCouponHistory = await offersHistoryModel.find({ userId, offerId }).populate("couponId").lean();
+  console.log("userCouponHistory: ", userCouponHistory);
+  if (!userCouponHistory || userCouponHistory.length === 0) {
+    return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
+  }
+  
+  if (userCouponHistory.some((history) => (history.offerId as any)?.expiry < new Date())) {
+    return errorResponseHandler("Offer is expired", httpStatusCode.BAD_REQUEST, res);
+  }
+  
+  if (payload.pointsWorth) {
+    pointsTobeRedeemed = payload.pointsWorth;
+  } else {
+    pointsTobeRedeemed = userCouponHistory.reduce((acc, curr) => {
+    if (curr.type === "earn") {
+      return acc + (curr.offerId as any).points;
+    }
+    return acc;
+  }, 0);
+  } 
+  console.log('pointsTobeRedeemed: ', pointsTobeRedeemed);
+  const updateUserPointsToBeRedeemed = await usersModel.updateOne(
+    { _id: userId }, 
+    {
+      $inc: { activePoints: pointsTobeRedeemed },
+    }
+  );
+  const userData = await usersModel.findById(userId);
+  if (!userData) {
+    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  }
+
+  // await updatePointsAndMoney(userId, userData.valuePerPoint, userData.totalPoints,);
+  if (!updateUserPointsToBeRedeemed) {
+    return errorResponseHandler("Failed to update user points", httpStatusCode.INTERNAL_SERVER_ERROR, res);
+  }
+  await offersHistoryModel.create({ userId, offerId, type: "redeem" });
+
+  return {
+    success: true,
+    message: "User offer history retrieved successfully",
+    data: userCouponHistory,
+  };
+};

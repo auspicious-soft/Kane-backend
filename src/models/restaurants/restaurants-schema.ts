@@ -22,6 +22,10 @@ const restaurantsSchema = new mongoose.Schema({
       type: Boolean,
       default: false
     },
+    eposLocationId: {
+      type: Number,
+      required: false,
+    },
   },
   { timestamps: true }
 );

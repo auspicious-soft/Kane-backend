@@ -4,6 +4,9 @@ import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOf
 import { logout } from "../controllers/auth/auth-controller";
 import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
 import { createPointsHistory } from "../controllers/points-history/points-history-controller";
+import { createCouponsHistory } from "../controllers/coupons-history/coupons-history-controller";
+import { getAchievementsByRestaurantId, getAllRestaurantAchievements, getUserStampsByRestaurantId } from "../controllers/achievements/achievements-controller";
+import { createAchievementHistory } from "../controllers/achievements-history/achievements-history-controller";
 
 const router = Router();
 //current User ROUTES
@@ -16,6 +19,7 @@ router.post("/logout", logout);
 
 //  //restaurants ROUTES
 router.post("/offer-history", createOfferHistory);
+router.post("/coupon-history", createCouponsHistory);
 router.post("/points-history", createPointsHistory);
 
 // Settings routes
@@ -35,6 +39,15 @@ router.get("/top-leaders", getTopLeaders);
 
 //upload-profile-pic
 router.post("/upload-image", uploadUserImageController);
+
+//Acheivements ROUTES
+router.get("/achievements/restaurants", getAllRestaurantAchievements);
+router.get("/achievements/restaurants/:id", getAchievementsByRestaurantId);
+router.get("/stamps/restaurants/:id", getUserStampsByRestaurantId);
+router.post("/collect-stamps", createAchievementHistory);
+// router.get("/users/:id", getUserById);
+
+
 
 
 
