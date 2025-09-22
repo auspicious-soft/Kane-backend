@@ -17,6 +17,7 @@ import { usersModel } from "./models/users/users-schema";
 import { createPointsHistoryService } from "./services/points-history/points-history-service";
 import { RestaurantsModel } from "./models/restaurants/restaurants-schema";
 import { updatePointsAndMoney } from "./services/users/users-service";
+import { UserVisitsModel } from "./models/user-visits/user-visits";
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url); // <-- Define __filename
@@ -69,78 +70,6 @@ const eposNowService = createEposNowService();
 app.get("/", (_, res: any) => {
 	res.send("Hello world entry point 🚀✅");
 });
-// let customers = [
-// 	{ id: 1, name: "Alice", points: 100 },
-// 	{ id: 2, name: "Bob", points: 50 },
-// ];
-// let vouchers: { code: string; value: number; customerId: any; redeemed: boolean; createdAt: string }[] = [];
-// // Helper to generate a unique voucher code
-// function generateVoucherCode() {
-// 	return "VOUCH" + Math.floor(Math.random() * 90000 + 10000);
-// }
-
-// // Get customer points
-// app.get("/customer/:id", (req, res) => {
-// 	const customer = customers.find((c) => c.id === parseInt(req.params.id));
-// 	if (!customer) return res.status(404).json({ error: "Customer not found." });
-// 	res.json({ name: customer.name, points: customer.points });
-// });
-
-// // Earn points (1 point per $1 spent)
-// app.post("/earn", (req, res) => {
-// 	const { customerId, amount } = req.body;
-// 	if (!customerId || !amount || amount <= 0) {
-// 		return res.status(400).json({ error: "Invalid request: customerId and positive amount required." });
-// 	}
-// 	const customer = customers.find((c) => c.id == customerId);
-// 	if (!customer) return res.status(404).json({ error: "Customer not found." });
-// 	const pointsToAdd = Math.floor(amount);
-// 	customer.points += pointsToAdd;
-// 	res.json({ message: "Points earned successfully", newPointsBalance: customer.points });
-// });
-
-// // Generate voucher using points (e.g., 100 pts = $10 voucher)
-// app.post("/generate-voucher", (req, res) => {
-// 	const { customerId, pointsSpent } = req.body;
-// 	if (!customerId || !pointsSpent || pointsSpent <= 0) {
-// 		return res.status(400).json({ error: "Invalid request: customerId and positive pointsSpent required." });
-// 	}
-// 	const customer = customers.find((c) => c.id == customerId);
-// 	if (!customer) return res.status(404).json({ error: "Customer not found." });
-// 	if (customer.points < pointsSpent) {
-// 		return res.status(400).json({ error: "Insufficient points." });
-// 	}
-// 	customer.points -= pointsSpent;
-// 	const voucherValue = pointsSpent / 10; // $1 value per 10 points (adjust as needed)
-// 	const voucher = {
-// 		code: generateVoucherCode(),
-// 		value: voucherValue,
-// 		customerId,
-// 		redeemed: false,
-// 		createdAt: new Date().toISOString(),
-// 	};
-// 	vouchers.push(voucher);
-// 	res.json({ message: "Voucher generated successfully", voucher });
-// });
-
-// // Redeem voucher
-// app.post("/redeem-voucher", (req, res) => {
-// 	const { customerId, voucherCode } = req.body;
-// 	if (!customerId || !voucherCode) {
-// 		return res.status(400).json({ error: "Invalid request: customerId and voucherCode required." });
-// 	}
-// 	const voucher = vouchers.find((v) => v.code === voucherCode && v.customerId === customerId);
-// 	if (!voucher) return res.status(404).json({ error: "Voucher not found." });
-// 	if (voucher?.redeemed) return res.status(400).json({ error: "Voucher already redeemed." });
-// 	voucher.redeemed = true;
-// 	(voucher as any).redeemedAt = new Date().toISOString();
-// 	res.json({ message: "Voucher redeemed successfully", success: true, value: voucher.value });
-// });
-
-// // Basic health check endpoint
-// app.get("/health", (req, res) => {
-// 	res.json({ status: "OK", customersCount: customers.length, vouchersCount: vouchers.length });
-// });
 
 const webhookService = {
 	async handleWebhook(eventTypeId: any, eposObject: any, eposAction: any, payload: any, res: Response) {
@@ -184,38 +113,9 @@ const webhookService = {
 					console.error(`Location with ID ${locationId} not found.`);
 					return { status: "error", message: "Location not found" };
 				}
-				// const existingVisitIndex = user.visitData.findIndex((visit:any) => visit.restaurantId.toString() === restaurant._id.toString());
 
-				// if (existingVisitIndex !== -1) {
-				// 	// Update existing visitData
-				// 	user.visitData[existingVisitIndex].totalVisits += 1;
-				// 	user.visitData[existingVisitIndex].currentVisitStreak += 1;
-				// } else {
-				// 	// Add new visitData entry
-				// 	user.visitData.push({
-				// 		totalVisits: 1,
-				// 		restaurantId: restaurant._id,
-				// 		currentVisitStreak: 1,
-				// 	});
-				// }
-
-				// await user.save();
-
-				// if (existingVisitIndex !== -1) {
-				// 	// Update existing visitData
-				// 	user.visitData[existingVisitIndex].totalVisits += 1;
-				// 	user.visitData[existingVisitIndex].currentVisitStreak += 1;
-				// } else {
-				// 	// Add new visitData entry
-				// 	user.visitData.push({
-				// 		totalVisits: 1,
-				// 		restaurantId: restaurant._id,
-				// 		currentVisitStreak: 1,
-				// 	});
-				// }
-
-				// await user.save();
-
+                const userVisit = await UserVisitsModel.create({userId:user._id,restaurantId:restaurant._id});
+				console.log('userVisit: ', userVisit);
 				const existingVisitIndex = user.visitData.findIndex((visit: any) => visit.restaurantId.toString() === restaurant._id.toString());
 
 				if (existingVisitIndex !== -1) {

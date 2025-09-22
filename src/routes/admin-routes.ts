@@ -5,8 +5,9 @@ import { createSettings, getSettings } from "../controllers/settings/settings-co
 import { dashboardForAdmin } from "../controllers/admin/admin-controller";
 import { createAchievement, deleteAchievement, getAchievementById, getAllAchievements, updateAchievement } from "../controllers/achievements/achievements-controller";
 import { createCoupons, deleteCoupons, getAllCoupons, getCouponsById, updateCoupons } from "../controllers/coupons/coupons-controller";
-import { getUserOfferHistory } from "../controllers/offers-history/offers-history-controller";
+import { getUserOfferHistory, postApplyUserOffer } from "../controllers/offers-history/offers-history-controller";
 import { getUserCouponHistory, postApplyUserCoupon, updateCouponHistory } from "../controllers/coupons-history/coupons-history-controller";
+import { getUserAchievementHistory, postApplyUserAchievements } from "../controllers/achievements-history/achievements-history-controller";
 
 const router = Router();
 //restaurants ROUTES
@@ -52,6 +53,13 @@ router.get("/dashboard", dashboardForAdmin);
 
 //user offer-history
 router.get("/offer-history/:id", getUserOfferHistory);
+router.post("/offer-history/apply", postApplyUserOffer);
+
+//user achievement-history
+router.get("/achievement-history/:id", getUserAchievementHistory);
+router.post("/achievement-history/apply", postApplyUserAchievements);
+
+//user coupon-history
 router.get("/coupon-history/:id", getUserCouponHistory);
 router.put("/coupon-history/:id", updateCouponHistory);
 router.post("/coupon-history/apply", postApplyUserCoupon);

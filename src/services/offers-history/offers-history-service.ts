@@ -107,7 +107,7 @@ export const getUserOfferHistoryService = async (userId: string, res: Response) 
 };
 
 
-export const postApplyUserCouponService = async (payload: any, res: Response) => {
+export const postApplyUserOfferService = async (payload: any, res: Response) => {
   const { userId, offerId } = payload;
   console.log('payload: ', payload);
   let pointsTobeRedeemed = 0;
