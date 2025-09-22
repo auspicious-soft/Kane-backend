@@ -13,6 +13,9 @@ import { referralHistoryModel } from "../../models/referral-history/referral-his
 import { createS3Client } from "../../config/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createEposNowService } from "../epos/epos-service";
+import { getUserAchievementHistoryService } from "../achievements-history/achievements-history-service";
+import { getUserOfferHistoryService } from "../offers-history/offers-history-service";
+import { getUserCouponHistoryService } from "../coupons-history/coupons-history-service";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -84,6 +87,27 @@ export const getUserByIdService = async (id: string, res: Response) => {
 		success: true,
 		message: "User retrieved successfully",
 		data: user,
+	};
+};
+export const getUserByBarcodeService = async (barcode: string, res: Response) => {
+	const user = await usersModel.findOne({ identifier: barcode }).select("-password");
+	if (!user) {
+		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	}
+	const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
+	const offers: any = await getUserOfferHistoryService(user?._id?.toString(), res);
+	const coupons: any = await getUserCouponHistoryService(user?._id?.toString(), res);
+
+	return {
+		success: true,
+		message: "User retrieved successfully",
+		data: {
+			user,
+			achievements: achievements.data,
+			offers: offers.data,
+			coupons: coupons.data,
+
+		},
 	};
 };
 export const getUserHistoryService = async (id: string, payload: any, res: Response) => {

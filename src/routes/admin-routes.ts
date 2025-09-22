@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { blockUser, getAllBlockedUsers, getAllUsers, getUserById, getUserHistory } from "../controllers/users/users-controller";
+import { blockUser, getAllBlockedUsers, getAllUsers, getUserByBarcode, getUserById, getUserHistory } from "../controllers/users/users-controller";
 import { createRestaurant, createRestaurantOffer, deleteRestaurant, getAllRestaurant, getAllRestaurantOffers, getRestaurantById, getRestaurantOfferById, updateRestaurant, updateRestaurantOffer } from "../controllers/restaurants/restaurants-controller";
 import { createSettings, getSettings } from "../controllers/settings/settings-controller";
 import { dashboardForAdmin } from "../controllers/admin/admin-controller";
@@ -50,6 +50,7 @@ router.get("/settings", getSettings);
 
 //dashboard 
 router.get("/dashboard", dashboardForAdmin);
+router.get("/user-barcode/:id", getUserByBarcode);
 
 //user offer-history
 router.get("/offer-history/:id", getUserOfferHistory);

@@ -19,6 +19,7 @@ import {
   getUserPointHistoryService,
   getTopLeadersService,
   uploadStreamToS3Service,
+  getUserByBarcodeService,
  
 } from "../../services/users/users-service";
 
@@ -50,6 +51,17 @@ export const getAllBlockedUsers = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const response = await getUserByIdService(req.params.id, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const getUserByBarcode = async (req: Request, res: Response) => {
+  try {
+    const response = await getUserByBarcodeService(req.params.id, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
