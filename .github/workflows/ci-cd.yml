@@ -82,6 +82,9 @@ jobs:
               -e AWS_SECRET_ACCESS_KEY='${{ secrets.AWS_SECRET_ACCESS_KEY }}' \
               -e AWS_BUCKET_NAME='${{ secrets.AWS_BUCKET_NAME }}' \
               -e FRONTEND_URL='${{ secrets.FRONTEND_URL }}' \
+              -e EPOSNOW_SECRET_KEY='${{ secrets.EPOSNOW_SECRET_KEY }}' \
+              -e EPOSNOW_ACCESS_TOKEN='${{ secrets.EPOSNOW_ACCESS_TOKEN }}' \
+              -e EPOSNOW_ACCESS_KEY='${{ secrets.EPOSNOW_ACCESS_KEY }}' \
               -e NODE_ENV='${{ secrets.NODE_ENV }}' \
               ${{ secrets.DOCKER_USERNAME }}/olivers-backend:latest || { echo 'Docker run failed'; exit 1; }
 
