@@ -158,7 +158,7 @@ export const postApplyUserCouponService = async (payload: any, res: Response) =>
 
 	return {
 		success: true,
-		message: "User coupon history retrieved successfully",
+		message: "Coupon applied successfully",
 		data: userCouponHistory,
 	};
 };

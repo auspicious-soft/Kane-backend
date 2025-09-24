@@ -20,12 +20,12 @@ export const createPointsHistoryService = async ( payload: any, res: Response) =
   if (!user) {
     return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
   }
-  user.totalPoints += pointsHistory.points;
   if (payload.type === "redeem") {
     user.redeemedPoints += pointsHistory.points;
     user.activePoints -= pointsHistory.points;
   }
   if(payload.type === "earn") {
+    user.totalPoints += pointsHistory.points;
     user.activePoints += pointsHistory.points;
   }
   await user.save();
