@@ -252,9 +252,7 @@ export const verifyOtpPasswordResetService = async (token: string, res: Response
 	return { success: true, message: "OTP verified successfully" };
 };
 export const verifyOtpSignupService = async (otp: string, fcmToken: string, res: Response) => {
-	console.log('otp: ', otp);
 	const existingToken = await getPasswordResetTokenByToken(otp);
-	console.log('existingToken: ', existingToken);
 	if (!existingToken) return errorResponseHandler("Please enter valid OTP.", httpStatusCode.BAD_REQUEST, res);
 
 	const hasExpired = new Date(existingToken.expires) < new Date();

@@ -63,6 +63,6 @@ export const addedUserCreds = async (payload: any) => {
         from: process.env.COMPANY_RESEND_GMAIL_ACCOUNT as string,
         to: payload.email,
         subject: "User Credentials",
-        text: `Hello ${payload.name ? payload.name.eng :payload.fullName.eng},\n\nYour account has been created with the following credentials:\n\nEmail: ${payload.email}\nPassword: ${payload.password}\nRole: ${payload.role}\n\nPlease keep this information secure.`,
+        text: `Hello ${payload.fullName},\n\nYour account has been created with the following credentials:\n\nEmail: ${payload.email}\nPassword: ${payload.password}\n\nYou can use these credentials to log in to your account.\n \nBest regards,\n${process.env.COMPANY_NAME}\n`,
     })
 }

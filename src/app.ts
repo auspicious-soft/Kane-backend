@@ -13,11 +13,8 @@ import { forgotPassword, login, logout, newPassswordAfterOTPVerified, resendOtp,
 import { getSettings } from "./controllers/settings/settings-controller";
 import { Error } from "mongoose";
 import { createEposNowService } from "./services/epos/epos-service";
-import { usersModel } from "./models/users/users-schema";
-import { createPointsHistoryService } from "./services/points-history/points-history-service";
-import { RestaurantsModel } from "./models/restaurants/restaurants-schema";
-import { updatePointsAndMoney } from "./services/users/users-service";
-import { UserVisitsModel } from "./models/user-visits/user-visits";
+
+import { webhookService } from "./services/webhook/webhook-service";
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url); // <-- Define __filename
@@ -66,120 +63,9 @@ var uploadsDir = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadsDir));
 
 connectDB();
-const eposNowService = createEposNowService();
 app.get("/", (_, res: any) => {
 	res.send("Hello world entry point 🚀✅");
 });
-
-const webhookService = {
-	async handleWebhook(eventTypeId: any, eposObject: any, eposAction: any, payload: any, res: Response) {
-		console.log("payload: ", payload);
-		console.log("eposObject: ", eposObject);
-		console.log("eposAction: ", eposAction);
-		const eventKey = `${eposObject}:${eposAction}`;
-
-		switch (eventKey) {
-			case "OrderedTransaction:Create":
-				console.log(`Received webhook: ${eposObject} ${eposAction}`);
-				console.log("Payload:", JSON.stringify(payload, null, 2));
-				// Add your logic here (e.g., save to database, trigger notification)
-				break;
-
-			case "Transaction:Complete":
-				console.log(`Received webhook: ${eposObject} ${eposAction}`);
-				console.log("Payload:", JSON.stringify(payload, null, 2));
-				// Fetch transaction details
-				const transaction: any = await eposNowService.getDataById("Transaction", payload.TransactionID, "v4");
-				if (!transaction) {
-					console.error(`Transaction with ID ${payload.TransactionID} not found.`);
-					return { status: "error", message: "Transaction not found" };
-				}
-				const eposId = transaction.CustomerId;
-				const user = await usersModel.findOne({ eposId });
-				if (!user) {
-					console.error(`Customer with EposId ${eposId} not found.`);
-					return { status: "error", message: "Customer not found" };
-				}
-				console.log("transaction: ", transaction);
-				const deviceData = await eposNowService.getDataById("Device", transaction.DeviceId, "V2");
-				console.log("deviceData: ", deviceData);
-				if (!deviceData || !(deviceData as any).LocationID) {
-					console.error(`Device with ID ${transaction.DeviceId} not found or has no LocationId.`);
-					return { status: "error", message: "Invalid device data" };
-				}
-				const locationId = (deviceData as any).LocationID;
-				const restaurant = await RestaurantsModel.findOne({ eposLocationId: locationId });
-				if (!restaurant) {
-					console.error(`Location with ID ${locationId} not found.`);
-					return { status: "error", message: "Location not found" };
-				}
-
-                const userVisit = await UserVisitsModel.create({userId:user._id,restaurantId:restaurant._id});
-				console.log('userVisit: ', userVisit);
-				const existingVisitIndex = user.visitData.findIndex((visit: any) => visit.restaurantId.toString() === restaurant._id.toString());
-
-				if (existingVisitIndex !== -1) {
-					// Update existing entry
-					user.visitData[existingVisitIndex].totalVisits += 1;
-					user.visitData[existingVisitIndex].currentVisitStreak += 1;
-				} else {
-					// Create new entry
-					user.visitData.push({
-						totalVisits: 1,
-						restaurantId: restaurant._id,
-						currentVisitStreak: 1,
-					});
-				}
-
-				await user.save();
-
-				// Check for transaction-level discount (outside TransactionItems)
-				if (transaction.DiscountReasonId && transaction.DiscountValue > 0) {
-					const discountReason = await eposNowService.getDataById("DiscountReason", transaction.DiscountReasonId, "v4");
-
-					if (discountReason && (discountReason as any).Name === "Coupon Redemption") {
-						console.log(`Processing Coupon Redemption for Transaction ${transaction.Id}`);
-						console.log(`Discount Amount: ${transaction.DiscountValue}`);
-						// user.redeemedPoints += transaction.DiscountValue;
-						user.activePoints -= transaction.DiscountValue;
-						await user.save();
-					} else if (discountReason && (discountReason as any).Name === "Point Redemption") {
-						console.log(`Processing Points Redemption for Transaction ${transaction.Id}`);
-						console.log(`Discount Amount: ${transaction.DiscountValue}`);
-						const payload = { userId: user._id, type: "redeem", points: transaction.DiscountValue, restaurantId: restaurant._id, orderDetails: `Transaction ID: ${transaction.Id}` };
-						await createPointsHistoryService(payload, res);
-					}
-				}
-
-				if (transaction.TransactionItems && transaction.TransactionItems.length > 0) {
-					for (const item of transaction.TransactionItems) {
-						if (item.DiscountReasonId && item.DiscountAmount > 0) {
-							const discountReason = await eposNowService.getDataById("DiscountReason", item.DiscountReasonId, "v4");
-							console.log("discountReason: ", discountReason);
-
-							if (discountReason && (discountReason as any).Name === "Coupon Redemption") {
-								console.log(`Processing Coupon Redemption for TransactionItem ${item.Id}`);
-								console.log(`Discount Amount: ${item.DiscountAmount}`);
-								// user.redeemedPoints += transaction.DiscountValue;
-								user.activePoints -= transaction.DiscountValue;
-								await user.save();
-							} else if (discountReason && (discountReason as any).Name === "Points Redemption") {
-								console.log(`Processing Points Redemption for TransactionItem ${item.Id}`);
-								console.log(`Discount Amount: ${item.DiscountAmount}`);
-								const payload = { userId: user._id, type: "redeem", points: transaction.DiscountValue };
-								console.log("payload: ", payload);
-								await createPointsHistoryService(payload, res);
-							}
-						}
-					}
-				}
-				break;
-			default:
-				console.log(`Unhandled EventTypeId: ${eventTypeId}`);
-		}
-		return { status: "success", message: "Webhook processed" };
-	},
-};
 
 app.post("/webhook/receive", (req, res) => {
 	console.log("req: ", req);
@@ -209,6 +95,26 @@ app.get("/api/user/settings", getSettings);
 app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
 app.use("/api/epos", epos);
+// payload:  {
+//   CustomerID: 7381427,
+//   Title: 3,
+//   Forename: 'Ankita Rana',
+//   Surname: null,
+//   BusinessName: null,
+//   DateOfBirth: '1998-12-10T00:00:00',
+//   ContactNumber: '96587421365',
+//   ContactNumber2: null,
+//   EmailAddress: 'ankita@yopmail.com',
+//   Type: null,
+//   MaxCredit: 0,
+//   CurrentBalance: 0,
+//   ExpiryDate: null,
+//   CardNumber: null,
+//   CurrentPoints: 0,
+//   SignUpDate: '2025-09-24T10:32:40',
+//   Notes: null,
+//   SignUpLocationID: 29687
+// }
 //adminAuth routes
 app.post("/api/login", login);
 app.post("/api/logout", logout);
@@ -218,7 +124,7 @@ app.post("/api/signup/verify-otp", verifyOtpSignup);
 app.post("/api/forgot-password", forgotPassword);
 app.patch("/api/new-password-otp-verified", newPassswordAfterOTPVerified);
 app.post("/api/signup", signup);
-// app.post("/api/user-verify-otp", verifyOTP)
+// app.post("/api/user-verify-otp", verifyOTP)   
 app.post("/api/resend-otp", resendOtp);
 // app.post("/api/user-forgot-password", forgotPasswordUser)
 // app.patch("/api/user-new-password-otp-verified", newPasswordAfterOTPVerifiedUser)
