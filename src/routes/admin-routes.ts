@@ -58,7 +58,7 @@ router.post("/offer-history/apply", postApplyUserOffer);
 
 //user achievement-history
 router.get("/achievement-history/:id", getUserAchievementHistory);
-router.post("/achievement-history/apply", postApplyUserAchievements);
+// router.post("/achievement-history/apply", postApplyUserAchievements);
 
 //user coupon-history
 router.get("/coupon-history/:id", getUserCouponHistory);

@@ -94,7 +94,7 @@ export const getUserByBarcodeService = async (barcode: string, res: Response) =>
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-	const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
+	// const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
 	const offers: any = await getUserOfferHistoryService(user?._id?.toString(), res);
 	const coupons: any = await getUserCouponHistoryService(user?._id?.toString(), res);
 
@@ -103,7 +103,7 @@ export const getUserByBarcodeService = async (barcode: string, res: Response) =>
 		message: "User retrieved successfully",
 		data: {
 			user,
-			achievements: achievements.data,
+			// achievements: achievements.data,
 			offers: offers.data,
 			coupons: coupons.data,
 
