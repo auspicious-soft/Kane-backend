@@ -145,39 +145,102 @@ export const getUserOfferHistoryService = async (userId: string, res: Response) 
     data: userOfferHistory
   };
 };
-export const getUserOfferHistoryForAdminService = async (userId: string, res: Response) => {
+// export const getUserOfferHistoryForAdminService = async (userId: string,payload: any, res: Response) => {
+//   if (!userId) {
+//     return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+//   }
+
+//   // Step 1: Fetch all "earn" entries
+//   const earnHistory = await offersHistoryModel
+//   .find({ userId, type: "earn" })
+//   .populate({ path: "offerId", populate: { path: "restaurantId" } })
+//   .lean();
+
+//   // Step 2: Fetch all "redeem" entries
+//   const redeemHistory = await offersHistoryModel
+//   .find({ userId, type: "redeem" })
+//   .select("offerId")
+//   .lean();
+
+//   if (!earnHistory || earnHistory.length === 0) {
+//     return errorResponseHandler("No offer history found for this user", httpStatusCode.NOT_FOUND, res);
+//   }
+
+//   // Step 3: Extract offerIds from redeem entries
+// const redeemedOfferIds = new Set(redeemHistory.map((entry) => String(entry.offerId)));
+// console.log('redeemedOfferIds: ', redeemedOfferIds);
+
+// const filteredEarnHistory = earnHistory.filter(
+//   (entry) => !redeemedOfferIds.has(String((entry.offerId as { _id: string })._id))
+// );
+
+//   return {
+//     success: true,
+//     message: "User offer history retrieved successfully",
+//     data: filteredEarnHistory,
+//   };
+// };
+export const getUserOfferHistoryForAdminService = async (
+  userId: string,
+  payload: any,
+  res: Response
+) => {
   if (!userId) {
-    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+    return errorResponseHandler(
+      "User ID is required",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
   }
+
+  const page = Number(payload.page) > 0 ? Number(payload.page) : 1;
+  const limit = Number(payload.limit) > 0 ? Number(payload.limit) : 10;
+  const skip = (page - 1) * limit;
 
   // Step 1: Fetch all "earn" entries
   const earnHistory = await offersHistoryModel
-  .find({ userId, type: "earn" })
-  .populate({ path: "offerId", populate: { path: "restaurantId" } })
-  .lean();
+    .find({ userId, type: "earn" })
+    .populate({ path: "offerId", populate: { path: "restaurantId" } })
+    .lean();
 
   // Step 2: Fetch all "redeem" entries
   const redeemHistory = await offersHistoryModel
-  .find({ userId, type: "redeem" })
-  .select("offerId")
-  .lean();
+    .find({ userId, type: "redeem" })
+    .select("offerId")
+    .lean();
 
   if (!earnHistory || earnHistory.length === 0) {
-    return errorResponseHandler("No offer history found for this user", httpStatusCode.NOT_FOUND, res);
+    return errorResponseHandler(
+      "No offer history found for this user",
+      httpStatusCode.NOT_FOUND,
+      res
+    );
   }
 
   // Step 3: Extract offerIds from redeem entries
-const redeemedOfferIds = new Set(redeemHistory.map((entry) => String(entry.offerId)));
-console.log('redeemedOfferIds: ', redeemedOfferIds);
+  const redeemedOfferIds = new Set(
+    redeemHistory.map((entry) => String(entry.offerId))
+  );
 
-const filteredEarnHistory = earnHistory.filter(
-  (entry) => !redeemedOfferIds.has(String((entry.offerId as { _id: string })._id))
-);
+  // Step 4: Filter earn history to remove redeemed offers
+  const filteredEarnHistory = earnHistory.filter(
+    (entry) => !redeemedOfferIds.has(String((entry.offerId as { _id: string })._id))
+  );
+
+  // Step 5: Paginate
+  const total = filteredEarnHistory.length;
+  const paginatedHistory = filteredEarnHistory.slice(skip, skip + limit);
 
   return {
     success: true,
     message: "User offer history retrieved successfully",
-    data: filteredEarnHistory,
+    data: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data:paginatedHistory
+    },
   };
 };
 

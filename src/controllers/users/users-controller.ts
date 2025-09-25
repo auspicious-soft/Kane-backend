@@ -61,7 +61,7 @@ export const getUserById = async (req: Request, res: Response) => {
 };
 export const getUserByBarcode = async (req: Request, res: Response) => {
   try {
-    const response = await getUserByBarcodeService(req.params.id, res);
+    const response = await getUserByBarcodeService(req.params.id, req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

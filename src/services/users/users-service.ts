@@ -89,14 +89,14 @@ export const getUserByIdService = async (id: string, res: Response) => {
 		data: user,
 	};
 };
-export const getUserByBarcodeService = async (barcode: string, res: Response) => {
+export const getUserByBarcodeService = async (barcode: string, req: any, res: Response) => {
 	const user = await usersModel.findOne({ identifier: barcode }).select("-password");
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 	// const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
-	const offers: any = await getUserOfferHistoryForAdminService(user?._id?.toString(), res);
-	const coupons: any = await getUserCouponHistoryforAdminService(user?._id?.toString(), res);
+	const offers: any = await getUserOfferHistoryForAdminService(user?._id?.toString(), req, res);
+	const coupons: any = await getUserCouponHistoryforAdminService(user?._id?.toString(), req, res);
 
 	return {
 		success: true,

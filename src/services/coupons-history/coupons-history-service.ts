@@ -112,34 +112,99 @@ export const getUserCouponHistoryService = async (userId: string, res: Response)
 	};
 };
 
-export const getUserCouponHistoryforAdminService = async (userId: string, res: Response) => {
+// export const getUserCouponHistoryforAdminService = async (userId: string, res: Response) => {
+//   if (!userId) {
+//     return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+//   }
+
+//   // Step 1: Fetch all "earn" entries
+//   const earnHistory = await couponsHistoryModel.find({ userId, type: "earn" }).populate({ path: "couponId", populate: { path: "offerName" } }).lean();
+
+//   // Step 2: Fetch all "redeem" entries
+//   const redeemHistory = await couponsHistoryModel.find({ userId, type: "redeem" }).select("couponId").lean();
+
+//   if (!earnHistory || earnHistory.length === 0) {
+//     return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
+//   }
+
+//   // Step 3: Extract couponIds from redeem entries
+//   const redeemedCouponIds = new Set(redeemHistory.map((entry) => String(entry.couponId)));
+
+//   // Step 4: Filter earn entries that do NOT have a redeem entry for the same couponId
+//   const filteredEarnHistory = earnHistory.filter(
+//   (entry) => !redeemedCouponIds.has(String((entry.couponId as { _id: string })._id))
+//   );
+
+//   // Step 5: Return filtered result
+//   return {
+//     success: true,
+//     message: "User coupon history retrieved successfully",
+//     data: filteredEarnHistory,
+//   };
+// };
+
+export const getUserCouponHistoryforAdminService = async (
+  userId: string,
+  payload: any,
+  res: Response
+) => {
   if (!userId) {
-    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+    return errorResponseHandler(
+      "User ID is required",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
   }
 
+  const page = Number(payload.page) > 0 ? Number(payload.page) : 1;
+  const limit = Number(payload.limit) > 0 ? Number(payload.limit) : 10;
+  const skip = (page - 1) * limit;
+
   // Step 1: Fetch all "earn" entries
-  const earnHistory = await couponsHistoryModel.find({ userId, type: "earn" }).populate({ path: "couponId", populate: { path: "offerName" } }).lean();
+  const earnHistory = await couponsHistoryModel
+    .find({ userId, type: "earn" })
+    .populate({ path: "couponId", populate: { path: "offerName" } })
+    .lean();
 
   // Step 2: Fetch all "redeem" entries
-  const redeemHistory = await couponsHistoryModel.find({ userId, type: "redeem" }).select("couponId").lean();
+  const redeemHistory = await couponsHistoryModel
+    .find({ userId, type: "redeem" })
+    .select("couponId")
+    .lean();
 
   if (!earnHistory || earnHistory.length === 0) {
-    return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
+    return errorResponseHandler(
+      "No coupon history found for this user",
+      httpStatusCode.NOT_FOUND,
+      res
+    );
   }
 
   // Step 3: Extract couponIds from redeem entries
-  const redeemedCouponIds = new Set(redeemHistory.map((entry) => String(entry.couponId)));
+  const redeemedCouponIds = new Set(
+    redeemHistory.map((entry) => String(entry.couponId))
+  );
 
   // Step 4: Filter earn entries that do NOT have a redeem entry for the same couponId
   const filteredEarnHistory = earnHistory.filter(
-  (entry) => !redeemedCouponIds.has(String((entry.couponId as { _id: string })._id))
+    (entry) => !redeemedCouponIds.has(String((entry.couponId as { _id: string })._id))
   );
 
-  // Step 5: Return filtered result
+  // Step 5: Paginate
+  const total = filteredEarnHistory.length;
+  const paginatedHistory = filteredEarnHistory.slice(skip, skip + limit);
+
+  // Step 6: Return paginated result
   return {
     success: true,
     message: "User coupon history retrieved successfully",
-    data: filteredEarnHistory,
+    data: { 
+		total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+		data:paginatedHistory },
+
   };
 };
 
