@@ -111,54 +111,160 @@ export const getUserCouponHistoryService = async (userId: string, res: Response)
 		data: userCouponHistory,
 	};
 };
+
+export const getUserCouponHistoryforAdminService = async (userId: string, res: Response) => {
+  if (!userId) {
+    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+  }
+
+  // Step 1: Fetch all "earn" entries
+  const earnHistory = await couponsHistoryModel.find({ userId, type: "earn" }).populate("couponId").lean();
+
+  // Step 2: Fetch all "redeem" entries
+  const redeemHistory = await couponsHistoryModel.find({ userId, type: "redeem" }).select("couponId").lean();
+
+  if (!earnHistory || earnHistory.length === 0) {
+    return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
+  }
+
+  // Step 3: Extract couponIds from redeem entries
+  const redeemedCouponIds = new Set(redeemHistory.map((entry) => String(entry.couponId)));
+
+  // Step 4: Filter earn entries that do NOT have a redeem entry for the same couponId
+  const filteredEarnHistory = earnHistory.filter(
+  (entry) => !redeemedCouponIds.has(String((entry.couponId as { _id: string })._id))
+  );
+
+  // Step 5: Return filtered result
+  return {
+    success: true,
+    message: "User coupon history retrieved successfully",
+    data: filteredEarnHistory,
+  };
+};
+
+
 export const postApplyUserCouponService = async (payload: any, res: Response) => {
 	const { userId, couponId } = payload;
 	console.log('payload: ', payload);
 	let pointsTobeRedeemed = 0;
+
 	if (!userId) {
 		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
+	if (!couponId) {
+		return errorResponseHandler("Coupon ID is required", httpStatusCode.BAD_REQUEST, res);
+	}
+
 	const userCouponHistory = await couponsHistoryModel.find({ userId, couponId }).populate("couponId").lean();
 	console.log("userCouponHistory: ", userCouponHistory);
+
 	if (!userCouponHistory || userCouponHistory.length === 0) {
 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
 	}
-	
+
+	// ✅ Check for expiry
 	if (userCouponHistory.some((history) => (history.couponId as any)?.expiry < new Date())) {
 		return errorResponseHandler("Coupon is expired", httpStatusCode.BAD_REQUEST, res);
 	}
-	
+
+	// ✅ Check if already redeemed
+	const alreadyRedeemed = userCouponHistory.some((history) => history.type === "redeem");
+	if (alreadyRedeemed) {
+		return errorResponseHandler("Coupon already redeemed", httpStatusCode.BAD_REQUEST, res);
+	}
+
+	// ✅ Calculate points
 	if (payload.pointsWorth) {
 		pointsTobeRedeemed = payload.pointsWorth;
 	} else {
 		pointsTobeRedeemed = userCouponHistory.reduce((acc, curr) => {
-		if (curr.type === "earn") {
-			return acc + (curr.couponId as any).points;
-		}
-		return acc;
-	}, 0);
+			if (curr.type === "earn") {
+				return acc + (curr.couponId as any).points;
+			}
+			return acc;
+		}, 0);
 	}
 	console.log('pointsTobeRedeemed: ', pointsTobeRedeemed);
+
+	// ✅ Update user points
 	const updateUserPointsToBeRedeemed = await usersModel.updateOne(
 		{ _id: userId },
 		{
 			$inc: { activePoints: pointsTobeRedeemed },
 		}
 	);
+
 	const userData = await usersModel.findById(userId);
 	if (!userData) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 
-	// await updatePointsAndMoney(userId, userData.valuePerPoint, userData.totalPoints,);
 	if (!updateUserPointsToBeRedeemed) {
 		return errorResponseHandler("Failed to update user points", httpStatusCode.INTERNAL_SERVER_ERROR, res);
 	}
+
+	// ✅ Log the redemption
 	await couponsHistoryModel.create({ userId, couponId, type: "redeem" });
 
 	return {
 		success: true,
 		message: "Coupon applied successfully",
-		data: userCouponHistory,
 	};
 };
+
+
+// export const postApplyUserCouponService = async (payload: any, res: Response) => {
+// 	const { userId, couponId } = payload;
+// 	console.log('payload: ', payload);
+// 	let pointsTobeRedeemed = 0;
+// 	if (!userId) {
+// 		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+// 	}
+// 	const userCouponHistory = await couponsHistoryModel.find({ userId, couponId }).populate("couponId").lean();
+// 	console.log("userCouponHistory: ", userCouponHistory);
+// 	if (!couponId) {
+// 		return errorResponseHandler("Coupon ID is required", httpStatusCode.BAD_REQUEST, res);
+// 	}
+// 	if (!userCouponHistory || userCouponHistory.length === 0) {
+// 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
+// 	}
+	
+// 	if (userCouponHistory.some((history) => (history.couponId as any)?.expiry < new Date())) {
+// 		return errorResponseHandler("Coupon is expired", httpStatusCode.BAD_REQUEST, res);
+// 	}
+	
+// 	if (payload.pointsWorth) {
+// 		pointsTobeRedeemed = payload.pointsWorth;
+// 	} else {
+// 		pointsTobeRedeemed = userCouponHistory.reduce((acc, curr) => {
+// 		if (curr.type === "earn") {
+// 			return acc + (curr.couponId as any).points;
+// 		}
+// 		return acc;
+// 	}, 0);
+// 	}
+// 	console.log('pointsTobeRedeemed: ', pointsTobeRedeemed);
+// 	const updateUserPointsToBeRedeemed = await usersModel.updateOne(
+// 		{ _id: userId },
+// 		{
+// 			$inc: { activePoints: pointsTobeRedeemed },
+// 		}
+// 	);
+// 	const userData = await usersModel.findById(userId);
+// 	if (!userData) {
+// 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+// 	}
+
+// 	// await updatePointsAndMoney(userId, userData.valuePerPoint, userData.totalPoints,);
+// 	if (!updateUserPointsToBeRedeemed) {
+// 		return errorResponseHandler("Failed to update user points", httpStatusCode.INTERNAL_SERVER_ERROR, res);
+// 	}
+// 	await couponsHistoryModel.create({ userId, couponId, type: "redeem" });
+
+// 	return {
+// 		success: true,
+// 		message: "Coupon applied successfully",
+// 		// data: userCouponHistory,
+// 	};
+// };

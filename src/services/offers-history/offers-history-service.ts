@@ -145,6 +145,42 @@ export const getUserOfferHistoryService = async (userId: string, res: Response) 
     data: userOfferHistory
   };
 };
+export const getUserOfferHistoryForAdminService = async (userId: string, res: Response) => {
+  if (!userId) {
+    return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+  }
+
+  // Step 1: Fetch all "earn" entries
+  const earnHistory = await offersHistoryModel
+  .find({ userId, type: "earn" })
+  .populate("offerId")
+  .lean();
+
+  // Step 2: Fetch all "redeem" entries
+  const redeemHistory = await offersHistoryModel
+  .find({ userId, type: "redeem" })
+  .select("offerId")
+  .lean();
+
+  if (!earnHistory || earnHistory.length === 0) {
+    return errorResponseHandler("No offer history found for this user", httpStatusCode.NOT_FOUND, res);
+  }
+
+  // Step 3: Extract offerIds from redeem entries
+const redeemedOfferIds = new Set(redeemHistory.map((entry) => String(entry.offerId)));
+console.log('redeemedOfferIds: ', redeemedOfferIds);
+
+const filteredEarnHistory = earnHistory.filter(
+  (entry) => !redeemedOfferIds.has(String((entry.offerId as { _id: string })._id))
+);
+
+  return {
+    success: true,
+    message: "User offer history retrieved successfully",
+    data: filteredEarnHistory,
+  };
+};
+
 
 
 export const postApplyUserOfferService = async (payload: any, res: Response) => {
@@ -154,7 +190,7 @@ export const postApplyUserOfferService = async (payload: any, res: Response) => 
   if (!userId) {
     return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const userCouponHistory = await offersHistoryModel.find({ userId, offerId }).populate("couponId").lean();
+  const userCouponHistory = await offersHistoryModel.find({ userId, offerId }).populate("offerId").lean();
   console.log("userCouponHistory: ", userCouponHistory);
   if (!userCouponHistory || userCouponHistory.length === 0) {
     return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);

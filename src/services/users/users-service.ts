@@ -14,8 +14,8 @@ import { createS3Client } from "../../config/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createEposNowService } from "../epos/epos-service";
 import { getUserAchievementHistoryService } from "../achievements-history/achievements-history-service";
-import { getUserOfferHistoryService } from "../offers-history/offers-history-service";
-import { getUserCouponHistoryService } from "../coupons-history/coupons-history-service";
+import { getUserOfferHistoryForAdminService, getUserOfferHistoryService } from "../offers-history/offers-history-service";
+import { getUserCouponHistoryforAdminService, getUserCouponHistoryService } from "../coupons-history/coupons-history-service";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -95,8 +95,8 @@ export const getUserByBarcodeService = async (barcode: string, res: Response) =>
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 	// const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
-	const offers: any = await getUserOfferHistoryService(user?._id?.toString(), res);
-	const coupons: any = await getUserCouponHistoryService(user?._id?.toString(), res);
+	const offers: any = await getUserOfferHistoryForAdminService(user?._id?.toString(), res);
+	const coupons: any = await getUserCouponHistoryforAdminService(user?._id?.toString(), res);
 
 	return {
 		success: true,
