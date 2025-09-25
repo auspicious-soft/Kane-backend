@@ -4,6 +4,8 @@ import { httpStatusCode } from "../../lib/constant";
 import { achievementsModel } from "../../models/achievements/achievements-schema";
 import { usersModel } from "../../models/users/users-schema";
 import { UserVisitsModel } from "../../models/user-visits/user-visits";
+import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
+import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
 
 
 export const createAchievementsService = async (payload: any, res: Response) => {
@@ -31,26 +33,39 @@ export const getAllAchievementsService = async (res: Response) => {
     data: achievements
   };
 };
+
 export const getAllRestaurantAchievementsService = async (res: Response) => {
-  const restaurants = await achievementsModel.aggregate([
+  const restaurants = await RestaurantOffersModel.aggregate([
+    // Step 1: Match only active offers
     { $match: { isActive: true } },
+
+    // Step 2: Group by restaurantId and count offers
     {
       $group: {
-        _id: "$assignRestaurant" // Group by restaurant
+        _id: "$restaurantId",
+        offerCount: { $sum: 1 }
       }
     },
+
+    // Step 3: Lookup restaurant details
     {
       $lookup: {
-        from: "restaurants",           // The collection name in MongoDB
+        from: "restaurants",
         localField: "_id",
         foreignField: "_id",
         as: "restaurant"
       }
     },
+
+    // Step 4: Unwind to flatten the array from lookup
     { $unwind: "$restaurant" },
+
+    // Step 5: Merge restaurant fields and offerCount into root
     {
       $replaceRoot: {
-        newRoot: "$restaurant" // Flatten the result
+        newRoot: {
+          $mergeObjects: ["$restaurant", { offerCount: "$offerCount" }]
+        }
       }
     }
   ]);
@@ -61,6 +76,38 @@ export const getAllRestaurantAchievementsService = async (res: Response) => {
     data: restaurants
   };
 };
+
+
+// export const getAllRestaurantAchievementsService = async (res: Response) => {
+//   const restaurants = await RestaurantOffersModel.aggregate([
+//     { $match: { isActive: true } },
+//     {
+//       $group: {
+//         _id: "$restaurantId" // Group by restaurant
+//       }
+//     },
+//     {
+//       $lookup: {
+//         from: "restaurants",           // The collection name in MongoDB
+//         localField: "_id",
+//         foreignField: "_id",
+//         as: "restaurant"
+//       }
+//     },
+//     { $unwind: "$restaurant" },
+//     {
+//       $replaceRoot: {
+//         newRoot: "$restaurant" // Flatten the result
+//       }
+//     }
+//   ]);
+
+//   return {
+//     success: true,
+//     message: "Restaurants retrieved successfully",
+//     data: restaurants
+//   };
+// };
 
 export const getAchievementsByIdService = async (achievementId: string, res: Response) => {
   if (!achievementId) {
@@ -98,10 +145,10 @@ export const getAchievementsByRestaurantIdService = async (userData: any, restau
   if (!restaurantId) {
     return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const achievements = await achievementsModel.find({ assignRestaurant: restaurantId }).populate("assignRestaurant").sort({createdAt:-1});
+  const restaurant = await RestaurantOffersModel.find({ restaurantId: restaurantId }).populate("restaurantId").sort({createdAt:-1});
 
-  if (!achievements) {
-    return errorResponseHandler("Achievements not found", httpStatusCode.NOT_FOUND, res);
+  if (!restaurant) {
+    return errorResponseHandler("Restaurant not found", httpStatusCode.NOT_FOUND, res);
   }
  const user = await usersModel.findById(userData.id);
 
@@ -118,7 +165,7 @@ export const getAchievementsByRestaurantIdService = async (userData: any, restau
     success: true,
     message: "Achievement retrieved successfully",
     data: {
-      achievements,
+      restaurant,
       currentVisitStreak,
     }
   };
