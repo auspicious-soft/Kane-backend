@@ -118,7 +118,7 @@ export const getUserCouponHistoryforAdminService = async (userId: string, res: R
   }
 
   // Step 1: Fetch all "earn" entries
-  const earnHistory = await couponsHistoryModel.find({ userId, type: "earn" }).populate("couponId").lean();
+  const earnHistory = await couponsHistoryModel.find({ userId, type: "earn" }).populate({ path: "couponId", populate: { path: "offerName" } }).lean();
 
   // Step 2: Fetch all "redeem" entries
   const redeemHistory = await couponsHistoryModel.find({ userId, type: "redeem" }).select("couponId").lean();

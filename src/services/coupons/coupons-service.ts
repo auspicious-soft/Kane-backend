@@ -27,6 +27,7 @@ export const createCouponsService = async (payload: any, res: Response) => {
 export const getAllCouponsService = async (res: Response) => {
 	 const coupons = await couponsModel
     .find({ isActive: true })
+    .populate("offerName")
     .sort({ createdAt: -1 });
 	return {
 		success: true,

@@ -153,7 +153,7 @@ export const getUserOfferHistoryForAdminService = async (userId: string, res: Re
   // Step 1: Fetch all "earn" entries
   const earnHistory = await offersHistoryModel
   .find({ userId, type: "earn" })
-  .populate("offerId")
+  .populate({ path: "offerId", populate: { path: "restaurantId" } })
   .lean();
 
   // Step 2: Fetch all "redeem" entries

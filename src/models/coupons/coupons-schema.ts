@@ -1,3 +1,4 @@
+import { Type } from "@aws-sdk/client-s3";
 import mongoose, { Types } from "mongoose";
 import { customAlphabet } from "nanoid";
 const identifier = customAlphabet("0123456789", 5);
@@ -10,8 +11,8 @@ const couponsSchema = new mongoose.Schema(
 			default: () => identifier(),
 		},
 		offerName: {
-			type: String,
-			default: null,
+			type: Types.ObjectId,
+			ref: "restaurant_offer",
 		},
 		couponName: {
 			type: String,
