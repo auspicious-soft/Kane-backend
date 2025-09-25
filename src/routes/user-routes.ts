@@ -2,11 +2,10 @@ import { Router } from "express";
 import {  changePassword, deleteUser, getAllUsers, getCurrentUser, getTopLeaders, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, uploadUserImageController, userHomePage } from "../controllers/users/users-controller";
 import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOfferById } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
-import { createOfferHistory } from "../controllers/offers-history/offers-history-controller";
+import { collectAchievement, createOfferHistory } from "../controllers/offers-history/offers-history-controller";
 import { createPointsHistory } from "../controllers/points-history/points-history-controller";
 import { createCouponsHistory } from "../controllers/coupons-history/coupons-history-controller";
 import { getAchievementsByRestaurantId, getAllRestaurantAchievements, getUserStampsByRestaurantId } from "../controllers/achievements/achievements-controller";
-import { createAchievementHistory } from "../controllers/achievements-history/achievements-history-controller";
 
 const router = Router();
 //current User ROUTES
@@ -44,7 +43,7 @@ router.post("/upload-image", uploadUserImageController);
 router.get("/achievements/restaurants", getAllRestaurantAchievements);
 router.get("/achievements/restaurants/:id", getAchievementsByRestaurantId);
 router.get("/stamps/restaurants/:id", getUserStampsByRestaurantId);
-router.post("/collect-stamps", createAchievementHistory);
+router.post("/collect-stamps", collectAchievement);
 // router.get("/users/:id", getUserById);
 
 

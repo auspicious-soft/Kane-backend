@@ -5,15 +5,16 @@ import { offersHistoryModel } from "../../models/offers-history/offers-history-s
 import { usersModel } from "../../models/users/users-schema";
 import { achievementsHistoryModel } from "../../models/achievement-history/achievement-history-schema";
 import { achievementsModel } from "../../models/achievements/achievements-schema";
+import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 
 export const createAchievementsHistoryService = async (payload: any, res: Response) => {
-	const { userId, achievementId, type } = payload;
-	if (!userId || !achievementId || !type || !["earn", "redeem"].includes(type)) {
+	const { userId, offerId, type } = payload;
+	if (!userId || !offerId || !type || !["earn", "redeem"].includes(type)) {
 		return errorResponseHandler("All achievement history fields are required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const achievementHistory = await achievementsHistoryModel.create({
+	const achievementHistory = await offersHistoryModel.create({
 		userId,
-		achievementId,
+		offerId,
 		type,
 	});
 	if (!achievementHistory) {
@@ -25,10 +26,10 @@ export const createAchievementsHistoryService = async (payload: any, res: Respon
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 
-	const achievement = await achievementsModel.findById(achievementId);
-	const restaurant = achievement ? achievement.assignRestaurant : null;
-	if (!achievement) {
-		return errorResponseHandler("Achievement not found", httpStatusCode.NOT_FOUND, res);
+	const offer = await RestaurantOffersModel.findById(offerId);
+	const restaurant = offer ? offer.restaurantId : null;
+	if (!offer) {
+		return errorResponseHandler("Offer not found", httpStatusCode.NOT_FOUND, res);
 	}
 	if (!restaurant) {
 		return errorResponseHandler("Assigned restaurant not found for this achievement", httpStatusCode.NOT_FOUND, res);

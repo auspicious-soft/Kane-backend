@@ -3,8 +3,48 @@ import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
 import { usersModel } from "../../models/users/users-schema";
+import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 
 
+
+export const collectAchievementService = async (payload: any, res: Response) => {
+  const { userId, offerId, type } = payload;
+  if (!userId || !offerId || !type || !["earn", "redeem"].includes(type)) {
+    return errorResponseHandler("All achievement history fields are required", httpStatusCode.BAD_REQUEST, res);
+  }
+  const achievementHistory = await offersHistoryModel.create({
+    userId,
+    offerId,
+    type,
+  });
+  if (!achievementHistory) {
+    return errorResponseHandler("Failed to create achievement history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
+  }
+  const userData = await usersModel.findById(userId);
+
+  if (!userData) {
+    return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+  }
+
+  const offer = await RestaurantOffersModel.findById(offerId);
+  const restaurant = offer ? offer.restaurantId : null;
+  if (!offer) {
+    return errorResponseHandler("Offer not found", httpStatusCode.NOT_FOUND, res);
+  }
+  if (!restaurant) {
+    return errorResponseHandler("Assigned restaurant not found for this achievement", httpStatusCode.NOT_FOUND, res);
+  }
+  const existingVisitIndex = userData.visitData.findIndex((visit: any) => visit.restaurantId.toString() === restaurant.toString());
+  // userData.visitData[existingVisitIndex].totalVisits += 1;
+  userData.visitData[existingVisitIndex].currentVisitStreak = 0;
+
+  await userData.save();
+  return {
+    success: true,
+    message: "Achievement collected successfully",
+    data: achievementHistory,
+  };
+};
 export const createOfferHistoryService = async (payload: any, res: Response) => {
   const { userId, offerId, type, freeItem } = payload;
   if (!userId || !offerId || !type || !["earn", "redeem"].includes(type)) {

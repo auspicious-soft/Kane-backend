@@ -4,17 +4,7 @@ import { httpStatusCode } from "../../lib/constant";
 import { createAchievementsHistoryService, deleteAchievementHistoryService, getAchievementHistoryByIdService, getAllAchievementHistoriesService, getUserAchievementHistoryService, postApplyUserAchievementService, updateAchievementHistoryService } from "../../services/achievements-history/achievements-history-service";
 
 // Create Achievement History
-export const createAchievementHistory = async (req: Request, res: Response) => {
-  try {
-    const response = await createAchievementsHistoryService(req.body, res);
-    return res.status(httpStatusCode.CREATED).json(response);
-  } catch (error: any) {
-    const { code, message } = errorParser(error);
-    return res
-      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: message || "An error occurred" });
-  }
-};
+
 
 // Get All Achievement Histories
 export const getAllAchievementHistories = async (req: Request, res: Response) => {
