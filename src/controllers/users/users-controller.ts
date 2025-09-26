@@ -20,6 +20,7 @@ import {
   getTopLeadersService,
   uploadStreamToS3Service,
   getUserByBarcodeService,
+  getSpinPrizesService,
  
 } from "../../services/users/users-service";
 
@@ -254,5 +255,17 @@ export const uploadUserImageController = async (req: Request, res: Response) => 
   } catch (error) {
     console.error('Upload error:', error);
     return formatErrorResponse(res, error);
+  }
+};
+
+export const getSpinPrizes= async (req: Request, res: Response) => {
+  try {
+    const response = await getSpinPrizesService(req.user,req.body, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
   }
 };

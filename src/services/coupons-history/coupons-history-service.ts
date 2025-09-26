@@ -185,7 +185,6 @@ export const getUserCouponHistoryforAdminService = async (
     redeemHistory.map((entry) => String(entry.couponId))
   );
 
-  console.log('earnHistory: ', earnHistory);
   // Step 4: Filter earn entries that do NOT have a redeem entry for the same couponId
   const filteredEarnHistory = earnHistory.filter(
 	  (entry) => !redeemedCouponIds.has(String((entry?.couponId as { _id: string })._id))

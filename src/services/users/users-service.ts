@@ -1,4 +1,4 @@
-import { Response } from "express";
+import e, { Response } from "express";
 import bcrypt from "bcryptjs";
 import { Readable } from "stream";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
@@ -123,7 +123,7 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 	let totalHistory;
 	if (payload.type === "points") {
 		totalHistory = await pointsHistoryModel.countDocuments(query);
-		history = await pointsHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("restaurantId");
+		history = await pointsHistoryModel.find({ ...query,type:"redeem" }).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("restaurantId");
 	} else if (payload.type === "offer") {
 		totalHistory = await offersHistoryModel.countDocuments(query);
 		history = await offersHistoryModel
@@ -404,4 +404,54 @@ export const uploadStreamToS3Service = async (
   await s3Client.send(command);
 
   return imageKey;
+};
+
+
+export const getSpinPrizesService = async (userData: any, payload: any, res: Response) => {
+	const user = await usersModel.findById(userData.id);
+	if (!user) {
+		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	}
+    if(payload.type === "points"){
+	  if(payload.prize ==="200 points"){
+		user.totalPoints += 200;
+		user.activePoints += 200;
+		await user.save();
+	  }
+	  else if(payload.prize ==="10 points"){
+		user.totalPoints += 10;
+		user.activePoints += 10;
+		await user.save();
+	  }
+	  else if(payload.prize ==="50 points"){
+		user.totalPoints += 50;
+		user.activePoints += 50;
+		await user.save();
+	  }
+	  else if(payload.prize ==="100 points"){
+		user.totalPoints += 100;
+		user.activePoints += 100;
+		await user.save();
+	  }
+	  else if(payload.prize ==="150 points"){
+		user.totalPoints += 150;
+		user.activePoints += 150;
+		await user.save();
+	  }
+	}
+	else if(payload.type === "coupon"){
+		const couponCode = `COUPON-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+		// Here you can save the coupon code to the database if needed
+	}
+	else if(payload.type === "message"){
+		// No action needed for message type
+	}
+	
+
+	return {
+		success: true,
+		data: {
+			
+		},
+	};
 };
