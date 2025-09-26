@@ -16,6 +16,8 @@ import { createEposNowService } from "../epos/epos-service";
 import { getUserAchievementHistoryService } from "../achievements-history/achievements-history-service";
 import { getUserOfferHistoryForAdminService, getUserOfferHistoryService } from "../offers-history/offers-history-service";
 import { getUserCouponHistoryforAdminService, getUserCouponHistoryService } from "../coupons-history/coupons-history-service";
+import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
+import { couponsModel } from "../../models/coupons/coupons-schema";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -46,17 +48,11 @@ export const getAllBlockedUsersService = async (payload: any) => {
 	const limit = parseInt(payload.limit as string) || 10;
 	const offset = (page - 1) * limit;
 
-	let { query, sort } = queryBuilder(payload, [
-    "fullName",
-    "email",
-    "firstName",
-    "lastName",
-  ]);
+	let { query, sort } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
 
- 
-  const finalQuery = { ...query, isBlocked: true } as Record<string, any>;
+	const finalQuery = { ...query, isBlocked: true } as Record<string, any>;
 
-  const totalUsers = await usersModel.countDocuments(finalQuery);
+	const totalUsers = await usersModel.countDocuments(finalQuery);
 	const users = await usersModel
 		.find({ isBlocked: true, ...query })
 		.sort(sort)
@@ -106,7 +102,6 @@ export const getUserByBarcodeService = async (barcode: string, req: any, res: Re
 			// achievements: achievements.data,
 			offers: offers.data,
 			coupons: coupons.data,
-
 		},
 	};
 };
@@ -123,7 +118,12 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 	let totalHistory;
 	if (payload.type === "points") {
 		totalHistory = await pointsHistoryModel.countDocuments(query);
-		history = await pointsHistoryModel.find({ ...query,type:"redeem" }).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("restaurantId");
+		history = await pointsHistoryModel
+			.find({ ...query, type: "redeem" })
+			.sort({ createdAt: -1 })
+			.skip(offset)
+			.limit(limit)
+			.populate("restaurantId");
 	} else if (payload.type === "offer") {
 		totalHistory = await offersHistoryModel.countDocuments(query);
 		history = await offersHistoryModel
@@ -163,15 +163,20 @@ export const getCurrentUserService = async (userData: any, res: Response) => {
 	return {
 		success: true,
 		message: "User retrieved successfully",
-		data: {user :user},
+		data: { user: user },
 	};
 };
 export const getTopLeadersService = async (payload: any, res: Response) => {
 	const page = parseInt(payload.page as string) || 1;
 	const limit = parseInt(payload.limit as string) || 10;
 	const offset = (page - 1) * limit;
-	const totalTopLeaders = await usersModel.countDocuments({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false, totalPoints: { $ne: 0 } })
-	const topLeaders = await usersModel.find({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false , totalPoints: { $ne: 0 }}).select("-password").sort({ totalPoints: -1 }).skip(offset).limit(limit);
+	const totalTopLeaders = await usersModel.countDocuments({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false, totalPoints: { $ne: 0 } });
+	const topLeaders = await usersModel
+		.find({ isBlocked: false, isDeleted: false, topLeaderPrivacy: false, totalPoints: { $ne: 0 } })
+		.select("-password")
+		.sort({ totalPoints: -1 })
+		.skip(offset)
+		.limit(limit);
 	return {
 		success: true,
 		message: "User retrieved successfully",
@@ -201,33 +206,31 @@ export const getUserPointHistoryService = async (userData: any, res: Response) =
 	};
 };
 // Update User
-export const updateUserService = async (id: string, payload: any,query: any, res: Response) => {
+export const updateUserService = async (id: string, payload: any, query: any, res: Response) => {
 	const user = await usersModel.findById(id);
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
 	let updatedUser;
-    if(query.type === "leaderPrivacy"){
-		 updatedUser = await usersModel.findByIdAndUpdate(id, {topLeaderPrivacy:payload.topLeaderPrivacy}, { new: true }).select("-password");
-	}
-	else{
-
+	if (query.type === "leaderPrivacy") {
+		updatedUser = await usersModel.findByIdAndUpdate(id, { topLeaderPrivacy: payload.topLeaderPrivacy }, { new: true }).select("-password");
+	} else {
 		updatedUser = await usersModel.findByIdAndUpdate(id, payload, { new: true }).select("-password");
 		if (updatedUser === null) {
-		  return {
-			success: false,
-			message: "User not found",
-		  };
+			return {
+				success: false,
+				message: "User not found",
+			};
 		}
-		const updatedCustomer = await eposNowService.updateData('Customer', [
+		const updatedCustomer = await eposNowService.updateData("Customer", [
 			{
-				"Id": user.eposId,
-				"EmailAddress": updatedUser.email?.toString(),
-				"ContactNumber": updatedUser.phoneNumber?.toString(),
-				"Forename": updatedUser.fullName?.toString(),
-				"Title": updatedUser.gender === "male" ? 1 : 3,
-				"SignUpDate": updatedUser.createdAt
-			}
+				Id: user.eposId,
+				EmailAddress: updatedUser.email?.toString(),
+				ContactNumber: updatedUser.phoneNumber?.toString(),
+				Forename: updatedUser.fullName?.toString(),
+				Title: updatedUser.gender === "male" ? 1 : 3,
+				SignUpDate: updatedUser.createdAt,
+			},
 		]);
 	}
 	return {
@@ -244,13 +247,13 @@ export const deleteUserService = async (id: string, res: Response) => {
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-	console.log('user.eposId: ', user.eposId);
+	console.log("user.eposId: ", user.eposId);
 	if (user.eposId) {
-		const result = await eposNowService.deleteData('Customer', [
-    {
-        "Id": parseInt(user.eposId, 10)
-    }
-]);
+		const result = await eposNowService.deleteData("Customer", [
+			{
+				Id: parseInt(user.eposId, 10),
+			},
+		]);
 	}
 	await usersModel.findByIdAndUpdate(id, { isDeleted: true });
 
@@ -376,82 +379,103 @@ export const updatePointsAndMoney = async (userId: any, valuePerPoint: any, tota
 	}
 };
 
-export const uploadStreamToS3Service = async (
-  fileStream: Readable,
-  fileName: string,
-  fileType: string,
-  userEmail: string
-): Promise<string> => {
-  const timestamp = Date.now();
-  const imageKey = `users/${userEmail}/images/${timestamp}-${fileName}`;
+export const uploadStreamToS3Service = async (fileStream: Readable, fileName: string, fileType: string, userEmail: string): Promise<string> => {
+	const timestamp = Date.now();
+	const imageKey = `users/${userEmail}/images/${timestamp}-${fileName}`;
 
-  // Convert stream to buffer
-  const chunks: any[] = [];
-  for await (const chunk of fileStream) {
-    chunks.push(chunk);
-  }
-  const fileBuffer = Buffer.concat(chunks);
+	// Convert stream to buffer
+	const chunks: any[] = [];
+	for await (const chunk of fileStream) {
+		chunks.push(chunk);
+	}
+	const fileBuffer = Buffer.concat(chunks);
 
-  const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: imageKey,
-    Body: fileBuffer,
-    ContentType: fileType,
-  };
+	const params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Key: imageKey,
+		Body: fileBuffer,
+		ContentType: fileType,
+	};
 
-  const s3Client = createS3Client();
-  const command = new PutObjectCommand(params);
-  await s3Client.send(command);
+	const s3Client = createS3Client();
+	const command = new PutObjectCommand(params);
+	await s3Client.send(command);
 
-  return imageKey;
+	return imageKey;
 };
-
 
 export const getSpinPrizesService = async (userData: any, payload: any, res: Response) => {
 	const user = await usersModel.findById(userData.id);
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-    if(payload.type === "points"){
-	  if(payload.prize ==="200 points"){
-		user.totalPoints += 200;
-		user.activePoints += 200;
-		await user.save();
-	  }
-	  else if(payload.prize ==="10 points"){
-		user.totalPoints += 10;
-		user.activePoints += 10;
-		await user.save();
-	  }
-	  else if(payload.prize ==="50 points"){
-		user.totalPoints += 50;
-		user.activePoints += 50;
-		await user.save();
-	  }
-	  else if(payload.prize ==="100 points"){
-		user.totalPoints += 100;
-		user.activePoints += 100;
-		await user.save();
-	  }
-	  else if(payload.prize ==="150 points"){
-		user.totalPoints += 150;
-		user.activePoints += 150;
-		await user.save();
-	  }
-	}
-	else if(payload.type === "coupon"){
-		const couponCode = `COUPON-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-		// Here you can save the coupon code to the database if needed
-	}
-	else if(payload.type === "message"){
+	if (payload.type === "points") {
+		if (payload.prize === "200 points") {
+			user.totalPoints += 200;
+			user.activePoints += 200;
+			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+
+			await user.save();
+		} else if (payload.prize === "10 points") {
+			user.totalPoints += 10;
+			user.activePoints += 10;
+			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await user.save();
+		} else if (payload.prize === "50 points") {
+			user.totalPoints += 50;
+			user.activePoints += 50;
+			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await user.save();
+		} else if (payload.prize === "100 points") {
+			user.totalPoints += 100;
+			user.activePoints += 100;
+			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await user.save();
+		} else if (payload.prize === "150 points") {
+			user.totalPoints += 150;
+			user.activePoints += 150;
+			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await user.save();
+		}
+	} else if (payload.type === "coupon") {
+		// Step 1: Fetch all active & valid coupons
+		const couponCodes = await couponsModel
+			.find({
+				isActive: true,
+				expiry: { $gt: new Date() },
+			})
+			.lean();
+
+		// Step 2: Get user's redeemed coupon history
+		const couponHistory = await couponsHistoryModel
+			.find({
+				userId: user._id,
+				// type: "redeem",
+			})
+			.lean();
+
+		// Step 3: Extract redeemed coupon IDs
+		const redeemedIds = couponHistory.map((h) => h.couponId.toString());
+
+		// Step 4: Filter out redeemed coupons
+		const availableCoupons = couponCodes.filter((coupon) => !redeemedIds.includes(coupon._id.toString()));
+
+		// Step 5: Randomly select one
+		let selectedCoupon = null;
+		if (availableCoupons.length > 0) {
+			const randomIndex = Math.floor(Math.random() * availableCoupons.length);
+			selectedCoupon = availableCoupons[randomIndex];
+			console.log('selectedCoupon: ', selectedCoupon);
+			await couponsHistoryModel.create({ userId: user._id, couponId: selectedCoupon._id, type: "earn" });
+		}
+
+		// 👉 selectedCoupon will be either a coupon object or null if none available
+	} else if (payload.type === "message") {
 		// No action needed for message type
 	}
-	
 
 	return {
 		success: true,
-		data: {
-			
-		},
+		message: "Spin prize processed successfully",
 	};
 };

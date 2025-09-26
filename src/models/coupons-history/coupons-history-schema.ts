@@ -24,6 +24,10 @@ const couponsHistorySchema = new mongoose.Schema({
       enum: ["earn", "redeem"],
       required: true,
     },
+    isScratched: {
+      type: Boolean,
+      default: false,
+    },
     freeItem: {
       type: String,
       },
