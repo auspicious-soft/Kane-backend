@@ -40,7 +40,8 @@ export const getCouponByIdService = async (couponId: string, res: Response) => {
 	if (!couponId) {
 		return errorResponseHandler("Coupons ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const coupons = await couponsModel.findById(couponId);
+	const coupons = await couponsModel.findById(couponId).populate("offerName")
+	;
 
 	if (!coupons) {
 		return errorResponseHandler("Coupons not found", httpStatusCode.NOT_FOUND, res);
