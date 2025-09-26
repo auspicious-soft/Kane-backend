@@ -173,11 +173,16 @@ export const getUserCouponHistoryforAdminService = async (
     .lean();
 
   if (!earnHistory || earnHistory.length === 0) {
-    return errorResponseHandler(
-      "No coupon history found for this user",
-      httpStatusCode.NOT_FOUND,
-      res
-    );
+    // return errorResponseHandler(
+    //   "No coupon history found for this user",
+    //   httpStatusCode.NOT_FOUND,
+    //   res
+    // );
+	return {
+	  success: true,
+	  message: "No coupon history found for this user",
+	  data: [],
+	};
   }
 
   // Step 3: Extract couponIds from redeem entries

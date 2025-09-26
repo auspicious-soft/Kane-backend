@@ -210,11 +210,16 @@ export const getUserOfferHistoryForAdminService = async (
     .lean();
 
   if (!earnHistory || earnHistory.length === 0) {
-    return errorResponseHandler(
-      "No offer history found for this user",
-      httpStatusCode.NOT_FOUND,
-      res
-    );
+    // return errorResponseHandler(
+    //   "No offer history found for this user",
+    //   httpStatusCode.NOT_FOUND,
+    //   res
+    // );
+    return {
+      success: true,
+      message: "No offer history found for this user",
+      data: [],
+    };
   }
 
   // Step 3: Extract offerIds from redeem entries
