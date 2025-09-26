@@ -40,7 +40,7 @@ export const getCouponByIdService = async (couponId: string, res: Response) => {
 	if (!couponId) {
 		return errorResponseHandler("Coupons ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const coupons = await couponsModel.findById(couponId).populate("offerName")
+	const coupons = await couponsModel.findById(couponId).populate({path:"offerName",populate:"restaurantId"})
 	;
 
 	if (!coupons) {
