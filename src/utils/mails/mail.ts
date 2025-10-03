@@ -66,3 +66,67 @@ export const addedUserCreds = async (payload: any) => {
         text: `Hello ${payload.fullName},\n\nYour account has been created with the following credentials:\n\nEmail: ${payload.email}\nPassword: ${payload.password}\n\nYou can use these credentials to log in to your account.\n \nBest regards,\n${process.env.COMPANY_NAME}\n`,
     })
 }
+
+
+export async function sendAbuseAlertEmail({
+  type,
+  transactionId,
+  userId,
+  StaffId,
+  discountApplied,
+  totalAllowed,
+  itemId,
+  itemPrice,
+}: {
+    type: "Overall Discount Abuse" | "Item Discount Abuse";
+    transactionId: string;
+    userId: string;
+    StaffId?: string;         // Optional, but useful for both types
+    discountApplied: number;
+    totalAllowed?: number;    // For overall abuse
+    itemId?: string;          // For item-level abuse
+    itemPrice?: number;       // For item-level abuse
+}) {
+    const subject = `⚠️ ${type} detected (Transaction ID: ${transactionId})`;
+    
+    console.log('StaffId: ', StaffId, type,transactionId, userId, discountApplied, totalAllowed, itemId, itemPrice);
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h2>🚨 Discount Abuse Alert</h2>
+      <p><strong>Type:</strong> ${type}</p>
+      <p><strong>Transaction ID:</strong> ${transactionId}</p>
+      <p><strong>User ID:</strong> ${userId}</p>
+      ${StaffId ? `<p><strong>Staff ID:</strong> ${StaffId}</p>` : ""}
+      ${
+        type === "Overall Discount Abuse"
+          ? `
+        <p><strong>Discount Applied:</strong> ${discountApplied}</p>
+        <p><strong>Total Allowed Discount:</strong> ${totalAllowed}</p>
+      `
+          : `
+        <p><strong>Item ID:</strong> ${itemId}</p>
+        <p><strong>Discount Applied:</strong> ${discountApplied}</p>
+        <p><strong>Item Price:</strong> ${itemPrice}</p>
+      `
+      }
+      <br />
+      <p>Please review this transaction for potential abuse or misuse of discounting privileges.</p>
+      <hr style="margin-top: 40px;" />
+      <small>This email was sent automatically from your webhook monitoring service.</small>
+    </div>
+  `;
+
+  try {
+    const result = await resend.emails.send({
+        from: process.env.COMPANY_RESEND_GMAIL_ACCOUNT as string,
+        to: ['mansi.bhandari1501@gmail.com'], // Add more if needed
+        subject,
+        html,
+    });
+    console.log('result: ', result);
+
+    console.log(`✅ Abuse alert email sent via Resend`);
+  } catch (error) {
+    console.error('❌ Failed to send abuse alert email via Resend:', error);
+  }
+}
