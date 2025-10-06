@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { Readable } from "stream";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
-import { queryBuilder } from "../../utils";
+import { queryBuilder, spinPrizes } from "../../utils";
 import { usersModel } from "../../models/users/users-schema";
 import { offersHistoryModel } from "./../../models/offers-history/offers-history-schema";
 import { pointsHistoryModel } from "./../../models/points-history/points-history-schema";
@@ -478,4 +478,11 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 		success: true,
 		message: "Spin prize processed successfully",
 	};
+};
+
+export const getAllSpinPrizesListService = async (req: any, res: Response) => {
+      return {
+          success: true,
+          data: spinPrizes
+      };
 };

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {  changePassword, deleteUser, getAllUsers, getCurrentUser, getSpinPrizes, getTopLeaders, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, uploadUserImageController, userHomePage } from "../controllers/users/users-controller";
+import {  changePassword, deleteUser, getAllSpinPrizesList, getAllUsers, getCurrentUser, getSpinPrizes, getTopLeaders, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, uploadUserImageController, userHomePage } from "../controllers/users/users-controller";
 import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOfferById } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
 import { collectAchievement, createOfferHistory } from "../controllers/offers-history/offers-history-controller";
@@ -48,6 +48,7 @@ router.post("/collect-stamps", collectAchievement);
 
 //spin prizes
 router.post("/spin-prizes", getSpinPrizes);
+router.get("/spin-prizes", getAllSpinPrizesList);
 
 
 

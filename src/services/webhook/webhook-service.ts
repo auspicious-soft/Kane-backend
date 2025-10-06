@@ -337,13 +337,15 @@ export const webhookService = {
 
 				// Fetch transaction details
 				const transaction: any = await eposNowService.getDataById("Transaction", payload.TransactionID, "v4");
+				console.log("transaction: ", transaction);
 				if (!transaction) {
 					console.error(`Transaction with ID ${payload.TransactionID} not found.`);
 					return { status: "error", message: "Transaction not found" };
 				}
 
 				const eposId = transaction.CustomerId;
-				const StaffId = transaction.StaffID;
+				const StaffId = transaction.StaffId;
+				console.log("StaffId: ", StaffId);
 				const user = await usersModel.findOne({ eposId });
 				if (!user) {
 					console.error(`Customer with EposId ${eposId} not found.`);
@@ -443,6 +445,7 @@ export const webhookService = {
 									userId: user._id.toString(),
 									StaffId: StaffId.toString(),
 									discountApplied: item.DiscountAmount,
+									totalAllowed: item.UnitPrice - 1,
 									itemPrice: item.UnitPrice,
 								});
 							}
