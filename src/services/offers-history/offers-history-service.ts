@@ -9,13 +9,17 @@ import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant
 
 export const collectAchievementService = async (payload: any, res: Response) => {
   const { userId, offerId, type } = payload;
-  if (!userId || !offerId || !type || !["earn", "redeem"].includes(type)) {
+  if (!userId || !offerId  ) {
     return errorResponseHandler("All achievement history fields are required", httpStatusCode.BAD_REQUEST, res);
+  }
+  const existingHistory = await offersHistoryModel.findOne({ userId, offerId, type: "redeem" });
+  if (existingHistory) {
+    return errorResponseHandler("Achievement already collected", httpStatusCode.BAD_REQUEST, res);
   }
   const achievementHistory = await offersHistoryModel.create({
     userId,
     offerId,
-    type,
+    type: "redeem",
   });
   if (!achievementHistory) {
     return errorResponseHandler("Failed to create achievement history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
@@ -36,7 +40,10 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   }
   const existingVisitIndex = userData.visitData.findIndex((visit: any) => visit.restaurantId.toString() === restaurant.toString());
   // userData.visitData[existingVisitIndex].totalVisits += 1;
-  userData.visitData[existingVisitIndex].currentVisitStreak = 0;
+  if(offer.visits > userData.visitData[existingVisitIndex].currentVisitStreak){
+    return errorResponseHandler("You cannot collect this achievement", httpStatusCode.NOT_FOUND, res);
+  }
+  userData.visitData[existingVisitIndex].currentVisitStreak -= offer.visits;
 
   await userData.save();
   return {
@@ -253,13 +260,11 @@ export const getUserOfferHistoryForAdminService = async (
 
 export const postApplyUserOfferService = async (payload: any, res: Response) => {
   const { userId, offerId } = payload;
-  console.log('payload: ', payload);
   let pointsTobeRedeemed = 0;
   if (!userId) {
     return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
   }
   const userCouponHistory = await offersHistoryModel.find({ userId, offerId }).populate("offerId").lean();
-  console.log("userCouponHistory: ", userCouponHistory);
   if (!userCouponHistory || userCouponHistory.length === 0) {
     return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
   }
@@ -278,7 +283,7 @@ export const postApplyUserOfferService = async (payload: any, res: Response) => 
     return acc;
   }, 0);
   } 
-  console.log('pointsTobeRedeemed: ', pointsTobeRedeemed);
+  
   const updateUserPointsToBeRedeemed = await usersModel.updateOne(
     { _id: userId }, 
     {
