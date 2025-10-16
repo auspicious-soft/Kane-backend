@@ -4,8 +4,9 @@ import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOf
 import { logout } from "../controllers/auth/auth-controller";
 import { collectAchievement, createOfferHistory, getUserOfferHistoryForUser } from "../controllers/offers-history/offers-history-controller";
 import { createPointsHistory } from "../controllers/points-history/points-history-controller";
-import { createCouponsHistory, getUserRedeemCouponHistory } from "../controllers/coupons-history/coupons-history-controller";
+import { createCouponsHistory, getUserEarnedCouponHistory, getUserRedeemCouponHistory, updateCouponStatus } from "../controllers/coupons-history/coupons-history-controller";
 import { getAchievementsByRestaurantId, getAllRestaurantAchievements, getUserStampsByRestaurantId, getUserVisits } from "../controllers/achievements/achievements-controller";
+import { updateCouponStatusService } from "../services/coupons-history/coupons-history-service";
 
 const router = Router();
 //current User ROUTES
@@ -49,6 +50,9 @@ router.get("/stamps/restaurants/:id", getUserStampsByRestaurantId);
 router.post("/collect-stamps", collectAchievement);
 // router.get("/users/:id", getUserById);
 
+//coupon routes
+router.get("/coupons", getUserEarnedCouponHistory);
+router.put("/coupons-scratch/:id", updateCouponStatus);
 //spin prizes
 router.post("/spin-prizes", getSpinPrizes);
 router.get("/spin-prizes", getAllSpinPrizesList);
