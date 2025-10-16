@@ -10,6 +10,7 @@ import {
   getUserOfferHistoryService,
   postApplyUserOfferService,
   collectAchievementService,
+  getUserOfferHistoryForUserService,
 } from "../../services/offers-history/offers-history-service";
 
 // Create Offer History
@@ -89,6 +90,17 @@ export const deleteOfferHistory = async (req: Request, res: Response) => {
 export const getUserOfferHistory = async (req: Request, res: Response) => {
   try {
     const response = await getUserOfferHistoryService(req.params.id, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const getUserOfferHistoryForUser = async (req: Request, res: Response) => {
+  try {
+    const response = await getUserOfferHistoryForUserService(req.user, req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

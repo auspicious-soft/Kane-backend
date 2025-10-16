@@ -4,6 +4,7 @@ import { httpStatusCode } from "../../lib/constant";
 import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
 import { usersModel } from "../../models/users/users-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
+import { count } from "console";
 
 
 
@@ -252,6 +253,76 @@ export const getUserOfferHistoryForAdminService = async (
       limit,
       totalPages: Math.ceil(total / limit),
       data:paginatedHistory
+    },
+  };
+};
+
+export const getUserOfferHistoryForUserService = async (
+  user: any,
+  payload: any,
+  res: Response
+) => {
+  console.log('payload: ', payload);
+  if (!user.id) {
+    return errorResponseHandler(
+      "User ID is required",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
+  }
+
+  const page = Number(payload.page) > 0 ? Number(payload.page) : 1;
+  const limit = Number(payload.limit) > 0 ? Number(payload.limit) : 10;
+  const skip = (page - 1) * limit;
+
+  // Step 1: Fetch all "earn" entries
+  const earnHistory = await offersHistoryModel
+    .find({ userId: user.id, })
+    .populate({ path: "offerId", populate: { path: "restaurantId" } })
+    .lean();
+  const totalEarnedOffers = await offersHistoryModel.countDocuments({ userId: user.id, type: "earn" });
+  // Step 2: Fetch all "redeem" entries
+  // const redeemHistory = await offersHistoryModel
+  //   .find({ userId: user.id, type: "redeem" })
+  //   .select("offerId")
+  //   .lean();
+
+  if (!earnHistory || earnHistory.length === 0) {
+    // return errorResponseHandler(
+    //   "No offer history found for this user",
+    //   httpStatusCode.NOT_FOUND,
+    //   res
+    // );
+    return {
+      success: true,
+      message: "No offer history found for this user",
+      data: [],
+    };
+  }
+
+  // Step 3: Extract offerIds from redeem entries
+  // const redeemedOfferIds = new Set(
+  //   redeemHistory.map((entry) => String(entry.offerId))
+  // );
+
+  // Step 4: Filter earn history to remove redeemed offers
+  // const filteredEarnHistory = earnHistory.filter(
+  //   (entry) => !redeemedOfferIds.has(String((entry.offerId as { _id: string })._id))
+  // );
+
+  // Step 5: Paginate
+  const total = earnHistory.length;
+  const paginatedHistory = earnHistory.slice(skip, skip + limit);
+
+  return {
+    success: true,
+    message: "User offer history retrieved successfully",
+    data: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data:{ totalEarnedOffers, history:paginatedHistory, }
     },
   };
 };

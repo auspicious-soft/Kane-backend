@@ -129,7 +129,7 @@ export const getUserStampsByRestaurantIdService = async (userData: any, restaura
   if (!restaurantId) {
     return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const stamps = (await UserVisitsModel.find({ restaurantId: restaurantId, userId: userData.id }));
+  const stamps = await UserVisitsModel.find({ restaurantId: restaurantId, userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
 
   if (!stamps) {
     return errorResponseHandler("Stamps not found", httpStatusCode.NOT_FOUND, res);
@@ -139,6 +139,25 @@ export const getUserStampsByRestaurantIdService = async (userData: any, restaura
     success: true,
     message: "Stamps retrieved successfully",
     data: stamps
+  };
+};
+export const getUserVisitsService = async (userData: any, payload: any, res: Response) => {
+  const { restaurantId } = payload;
+  let visits;
+  if (restaurantId) {
+     visits = await UserVisitsModel.find({ restaurantId: restaurantId, userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
+  } else {
+     visits = await UserVisitsModel.find({ userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
+  }
+
+  if (!visits) {
+    return errorResponseHandler("Visits not found", httpStatusCode.NOT_FOUND, res);
+  }
+
+  return {
+    success: true,
+    message: "Visits retrieved successfully",
+    data: visits
   };
 };
 export const getAchievementsByRestaurantIdService = async (userData: any, restaurantId: string, res: Response) => {

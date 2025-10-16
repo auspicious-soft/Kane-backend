@@ -111,6 +111,33 @@ export const getUserCouponHistoryService = async (userId: string, res: Response)
 		data: userCouponHistory,
 	};
 };
+export const getUserRedeemCouponHistoryService = async (user: any, payload: any, res: Response) => {
+	const page = parseInt(payload.page as string) || 1;
+	const limit = parseInt(payload.limit as string) || 10;
+	const offset = (page - 1) * limit;
+	if (!user.id) {
+		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
+	}
+	const userCouponHistory = await couponsHistoryModel.find({ userId: user.id, type: "redeem" }).skip(offset).limit(limit).populate("couponId");
+	const total = await couponsHistoryModel.countDocuments({ userId: user.id, type: "redeem" });
+	if (!userCouponHistory) {
+		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
+	}
+
+	return {
+		success: true,
+		message: "User coupon history retrieved successfully",
+		data: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+			data: userCouponHistory
+		}
+	};
+};
+
+	
 
 // export const getUserCouponHistoryforAdminService = async (userId: string, res: Response) => {
 //   if (!userId) {
@@ -203,7 +230,8 @@ export const getUserCouponHistoryforAdminService = async (
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-		data:paginatedHistory },
+	  data: paginatedHistory
+	},
 
   };
 };
