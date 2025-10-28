@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {  changePassword, deleteUser, getAllSpinPrizesList, getAllUsers, getCurrentUser, getSpinPrizes, getTopLeaders, getUserById, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, uploadUserImageController, userHomePage } from "../controllers/users/users-controller";
+import {  changePassword, deleteUser, getAllSpinPrizesList, getAllUsers, getCurrentUser, getSpinPrizes, getTopLeaders, getUserById, getUserHistory, getUserHistoryForUser, getUserPointHistory, inviteCodeAndReferredDetails, updateUser, uploadUserImageController, userHomePage } from "../controllers/users/users-controller";
 import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOfferById } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
 import { collectAchievement, createOfferHistory, getUserOfferHistoryForUser } from "../controllers/offers-history/offers-history-controller";
@@ -24,6 +24,8 @@ router.post("/coupon-history", createCouponsHistory);
 router.get("/coupon-history", getUserRedeemCouponHistory);
 router.get("/visit-history", getUserVisits);
 router.post("/points-history", createPointsHistory);
+router.get("/user-history", getUserHistoryForUser);
+
 
 // Settings routes
 router.put("/change-password", changePassword);

@@ -14,10 +14,11 @@ import { createS3Client } from "../../config/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createEposNowService } from "../epos/epos-service";
 import { getUserAchievementHistoryService } from "../achievements-history/achievements-history-service";
-import { getUserOfferHistoryForAdminService, getUserOfferHistoryService } from "../offers-history/offers-history-service";
-import { getUserCouponHistoryforAdminService, getUserCouponHistoryService } from "../coupons-history/coupons-history-service";
+import { getUserOfferHistoryForAdminService, getUserOfferHistoryForUserService, getUserOfferHistoryService } from "../offers-history/offers-history-service";
+import { getUserCouponHistoryforAdminService, getUserCouponHistoryService, getUserRedeemCouponHistoryService } from "../coupons-history/coupons-history-service";
 import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
 import { couponsModel } from "../../models/coupons/coupons-schema";
+import { getUserVisitsService } from "../achievements/achievements-service";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -151,6 +152,38 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 				total: totalHistory,
 			},
 		},
+	};
+};
+export const getUserHistoryForUserService = async (user: any, payload: any, res: Response) => {
+	console.log('payload: ', payload);
+	console.log('user: ', user);
+	if (!user) {
+		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	}
+	const page = parseInt(payload.page as string) || 1;
+	const limit = parseInt(payload.limit as string) || 10;
+	const offset = (page - 1) * limit;
+	const query = { userId: user.id };
+	let history;
+	let totalHistory;
+	if (payload.type === "coupon") {
+		history = await getUserRedeemCouponHistoryService(user, payload, res);
+	} else if (payload.type === "offer") {
+		history = await getUserOfferHistoryForUserService(user, payload, res);
+	} else if (payload.type === "visit") {
+		history = await getUserVisitsService(user, payload, res);
+	}
+	return {
+		success: true,
+		message: "User History retrieved successfully",
+		data: 
+			history?.data,
+			// pagination: {
+			// 	page,
+			// 	limit,
+			// 	total: totalHistory,
+			// },
+		
 	};
 };
 

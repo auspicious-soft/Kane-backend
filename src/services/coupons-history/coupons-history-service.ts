@@ -287,7 +287,6 @@ export const postApplyUserCouponService = async (payload: any, res: Response) =>
 			return acc;
 		}, 0);
 	}
-	console.log('pointsTobeRedeemed: ', pointsTobeRedeemed);
 
 	// ✅ Update user points
 	const updateUserPointsToBeRedeemed = await usersModel.updateOne(
@@ -370,3 +369,4 @@ export const postApplyUserCouponService = async (payload: any, res: Response) =>
 // 		// data: userCouponHistory,
 // 	};
 // };
+

@@ -22,6 +22,7 @@ import {
   getUserByBarcodeService,
   getSpinPrizesService,
   getAllSpinPrizesListService,
+  getUserHistoryForUserService,
  
 } from "../../services/users/users-service";
 
@@ -75,6 +76,17 @@ export const getUserByBarcode = async (req: Request, res: Response) => {
 export const getUserHistory = async (req: Request, res: Response) => {
   try {
     const response = await getUserHistoryService(req.params.id, req.query, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const getUserHistoryForUser = async (req: Request, res: Response) => {
+  try {
+    const response = await getUserHistoryForUserService(req.user, req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
