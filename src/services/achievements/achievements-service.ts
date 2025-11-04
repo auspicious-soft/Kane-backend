@@ -144,10 +144,13 @@ export const getUserStampsByRestaurantIdService = async (userData: any, restaura
 export const getUserVisitsService = async (userData: any, payload: any, res: Response) => {
   const { restaurantId } = payload;
   let visits;
+  let total;
   if (restaurantId) {
+    total = await UserVisitsModel.countDocuments({ restaurantId: restaurantId, userId: userData.id });
      visits = await UserVisitsModel.find({ restaurantId: restaurantId, userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
   } else {
-     visits = await UserVisitsModel.find({ userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
+    total = await UserVisitsModel.countDocuments({ userId: userData.id });
+    visits = await UserVisitsModel.find({ userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
   }
 
   if (!visits) {
@@ -157,7 +160,7 @@ export const getUserVisitsService = async (userData: any, payload: any, res: Res
   return {
     success: true,
     message: "Visits retrieved successfully",
-    data: visits
+    data: { total, visits }
   };
 };
 export const getAchievementsByRestaurantIdService = async (userData: any, restaurantId: string, res: Response) => {

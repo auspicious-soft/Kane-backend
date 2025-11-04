@@ -5,6 +5,7 @@ import { offersHistoryModel } from "../../models/offers-history/offers-history-s
 import { usersModel } from "../../models/users/users-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { count } from "console";
+import { sendNotification } from "../../utils/FCM/FCM";
 
 
 
@@ -47,6 +48,8 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   userData.visitData[existingVisitIndex].currentVisitStreak -= offer.visits;
 
   await userData.save();
+      await sendNotification({userIds:[userId], type: "Stamp_Collected"});
+  
   return {
     success: true,
     message: "Achievement collected successfully",

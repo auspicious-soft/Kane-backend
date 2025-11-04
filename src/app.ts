@@ -15,6 +15,7 @@ import { Error } from "mongoose";
 import { createEposNowService } from "./services/epos/epos-service";
 
 import { webhookService } from "./services/webhook/webhook-service";
+import { initializeFirebase } from "./utils/FCM/FCM";
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url); // <-- Define __filename
@@ -36,17 +37,8 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
 
-// app.use(
-//     cors({
-//         origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || 'https://admin.oliversgroup.co.uk' : 'http://localhost:3000',
-//         methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
-//         credentials: true,
-//     })
-// );
+initializeFirebase();
 
 app.use(
 	cors({
@@ -95,27 +87,6 @@ app.get("/api/user/settings", getSettings);
 app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
 app.use("/api/epos", epos);
-// payload:  {
-//   CustomerID: 7381427,
-//   Title: 3,
-//   Forename: 'Ankita Rana',
-//   Surname: null,
-//   BusinessName: null,
-//   DateOfBirth: '1998-12-10T00:00:00',
-//   ContactNumber: '96587421365',
-//   ContactNumber2: null,
-//   EmailAddress: 'ankita@yopmail.com',
-//   Type: null,
-//   MaxCredit: 0,
-//   CurrentBalance: 0,
-//   ExpiryDate: null,
-//   CardNumber: null,
-//   CurrentPoints: 0,
-//   SignUpDate: '2025-09-24T10:32:40',
-//   Notes: null,
-//   SignUpLocationID: 29687
-// }
-//adminAuth routes
 app.post("/api/login", login);
 app.post("/api/logout", logout);
 app.post("/api/verify-otp", verifyOtpPasswordReset);
@@ -124,7 +95,7 @@ app.post("/api/signup/verify-otp", verifyOtpSignup);
 app.post("/api/forgot-password", forgotPassword);
 app.patch("/api/new-password-otp-verified", newPassswordAfterOTPVerified);
 app.post("/api/signup", signup);
-// app.post("/api/user-verify-otp", verifyOTP)   
+// app.post("/api/user-verify-otp", verifyOTP)
 app.post("/api/resend-otp", resendOtp);
 // app.post("/api/user-forgot-password", forgotPasswordUser)
 // app.patch("/api/user-new-password-otp-verified", newPasswordAfterOTPVerifiedUser)

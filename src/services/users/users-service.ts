@@ -19,6 +19,7 @@ import { getUserCouponHistoryforAdminService, getUserCouponHistoryService, getUs
 import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
 import { couponsModel } from "../../models/coupons/coupons-schema";
 import { getUserVisitsService } from "../achievements/achievements-service";
+import { sendNotification } from "../../utils/FCM/FCM";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -155,8 +156,8 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 	};
 };
 export const getUserHistoryForUserService = async (user: any, payload: any, res: Response) => {
-	console.log('payload: ', payload);
-	console.log('user: ', user);
+	console.log("payload: ", payload);
+	console.log("user: ", user);
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
@@ -176,14 +177,12 @@ export const getUserHistoryForUserService = async (user: any, payload: any, res:
 	return {
 		success: true,
 		message: "User History retrieved successfully",
-		data: 
-			history?.data,
-			// pagination: {
-			// 	page,
-			// 	limit,
-			// 	total: totalHistory,
-			// },
-		
+		data: history?.data,
+		// pagination: {
+		// 	page,
+		// 	limit,
+		// 	total: totalHistory,
+		// },
 	};
 };
 
@@ -498,7 +497,7 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 		if (availableCoupons.length > 0) {
 			const randomIndex = Math.floor(Math.random() * availableCoupons.length);
 			selectedCoupon = availableCoupons[randomIndex];
-			console.log('selectedCoupon: ', selectedCoupon);
+			console.log("selectedCoupon: ", selectedCoupon);
 			await couponsHistoryModel.create({ userId: user._id, couponId: selectedCoupon._id, type: "earn" });
 		}
 
@@ -506,7 +505,9 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 	} else if (payload.type === "message") {
 		// No action needed for message type
 	}
-
+	if (payload.type !== "message" && payload.prize !== "Better luck next time") {
+		await sendNotification({ userIds: [user._id], type: "Won_Reward"});
+	}
 	return {
 		success: true,
 		message: "Spin prize processed successfully",
@@ -514,8 +515,8 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 };
 
 export const getAllSpinPrizesListService = async (req: any, res: Response) => {
-      return {
-          success: true,
-          data: spinPrizes
-      };
+	return {
+		success: true,
+		data: spinPrizes,
+	};
 };

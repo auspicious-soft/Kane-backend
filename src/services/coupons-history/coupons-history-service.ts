@@ -4,6 +4,7 @@ import { httpStatusCode } from "../../lib/constant";
 import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
 import { usersModel } from "../../models/users/users-schema";
 import { updatePointsAndMoney } from "../users/users-service";
+import path from "path";
 
 interface CouponHistory {
 	type: "earn" | "redeem";

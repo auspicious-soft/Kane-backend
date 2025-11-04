@@ -133,6 +133,10 @@ const userSchema = new mongoose.Schema(
 			],
 			default: [],
 		},
+		notificationAllowed: {
+			type: Boolean,
+			default: true,
+		},
 	},
 	{ timestamps: true }
 );

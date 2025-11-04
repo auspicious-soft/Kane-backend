@@ -79,6 +79,31 @@ export const convertToBoolean = (value: string) => {
   ];
 
 
+  export const notificationMessages: any = {
+  eng: {
+    Won_Reward: {
+      title: "Congratulations!",
+      description: "You've won a reward!",
+    },
+    Referral_Used: {
+      title: "Referral Used",
+      description: "A referral has been used.",
+    },
+    Redeem_Coupon: {
+      title: "Coupon Redeemed",
+      description: "A coupon has been redeemed.",
+    },
+    Redeem_Points: {
+      title: "Points Redeemed",
+      description: "Points have been redeemed.",
+    },
+    Stamp_collected: {
+      title: "Stamp Collected",
+      description: "You've collected a new stamp!",
+    },
+  },
+};
+
 // export const increaseReferredCountAndCredits = async (id: mongoose.Types.ObjectId) => {
 //   await usersModel.findByIdAndUpdate(id, { $inc: { referredCount: 1, creditsLeft: 10 } });
 // };
