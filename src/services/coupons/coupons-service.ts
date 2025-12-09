@@ -70,6 +70,7 @@ export const updateCouponService = async (historyId: string, payload: any, res: 
 	};
 };
 
+
 export const deleteCouponService = async (couponId: string, res: Response) => {
 	if (!couponId) {
 		return errorResponseHandler("Coupons ID is required", httpStatusCode.BAD_REQUEST, res);
