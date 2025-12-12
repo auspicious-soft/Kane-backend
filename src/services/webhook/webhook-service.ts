@@ -13,7 +13,7 @@ import { customAlphabet } from "nanoid";
 import { passwordResetTokenModel } from "../../models/password-token-schema";
 import { generatePasswordResetToken } from "../../utils/mails/token";
 import { addedUserCreds, sendAbuseAlertEmail, sendEmailVerificationMail } from "../../utils/mails/mail";
-import { sendNotification } from "../../utils/FCM/FCM";
+// import { sendNotification } from "../../utils/FCM/FCM";
 
 const eposNowService = createEposNowService();
 export const createCustomerThroughWebhookService = async (payload: any, res: Response) => {
@@ -187,11 +187,11 @@ export const webhookService = {
 							if (discountReason && (discountReason as any).Name === "Coupon Redemption") {
 								user.activePoints = Math.max(0, (Number(user.activePoints) || 0) - (Number(item.DiscountAmount) || 0));
 								await user.save();
-								await sendNotification({ userIds: [user._id], type: "Redeem_Coupon" });
+								// await sendNotification({ userIds: [user._id], type: "Redeem_Coupon" });
 							} else if (discountReason && (discountReason as any).Name === "Point Redemption") {
 								const payload = { userId: user._id, type: "redeem", points: item.DiscountAmount };
 								await createPointsHistoryService(payload, res);
-								await sendNotification({ userIds: [user._id], type: "Redeem_Points" });
+								// await sendNotification({ userIds: [user._id], type: "Redeem_Points" });
 							}
 						}
 					}

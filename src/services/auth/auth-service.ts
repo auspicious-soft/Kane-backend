@@ -14,7 +14,7 @@ import { pointsHistoryModel } from "../../models/points-history/points-history-s
 import { generateBarcode } from "../../utils/generateBarcode";
 import { updatePointsAndMoney } from "../users/users-service";
 import { createEposNowService } from "../epos/epos-service";
-import { sendNotification } from "../../utils/FCM/FCM";
+// import { sendNotification } from "../../utils/FCM/FCM";
 
 const eposNowService = createEposNowService();
 export const loginService = async (payload: any, res: Response) => {
@@ -141,7 +141,7 @@ async function handleReferral(referralCode: string | null | undefined, newUserId
 		const referredPoints = await eposNowService.createData("CustomerPoints", data1);
 	}
 	await pointsHistoryModel.create({ pointsFrom: "USED_REFERRAL_CODE", title: `Used referral code.`, userId: newUserId, points: REFERRED_USER_POINTS, type: "earn" });
-    await sendNotification({userIds:[referrer._id], type: "Referral_Used", referenceId: newUserId});
+    // await sendNotification({userIds:[referrer._id], type: "Referral_Used", referenceId: newUserId});
 }
 export const signupService = async (payload: any, res: Response) => {
 	const { email, password, referralCodeSignup } = payload;

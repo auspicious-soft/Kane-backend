@@ -19,7 +19,7 @@ import { getUserCouponHistoryforAdminService, getUserCouponHistoryService, getUs
 import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
 import { couponsModel } from "../../models/coupons/coupons-schema";
 import { getUserVisitsService } from "../achievements/achievements-service";
-import { sendNotification } from "../../utils/FCM/FCM";
+// import { sendNotification } from "../../utils/FCM/FCM";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -506,7 +506,7 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 		// No action needed for message type
 	}
 	if (payload.type !== "message" && payload.prize !== "Better luck next time") {
-		await sendNotification({ userIds: [user._id], type: "Won_Reward"});
+		// await sendNotification({ userIds: [user._id], type: "Won_Reward"});
 	}
 	return {
 		success: true,
