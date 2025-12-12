@@ -88,7 +88,6 @@ app.get("/api/user/settings", getSettings);
 app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
 app.use("/api/epos", epos);
-
 app.post("/api/login", login);
 app.post("/api/logout", logout);
 app.post("/api/verify-otp", verifyOtpPasswordReset);
