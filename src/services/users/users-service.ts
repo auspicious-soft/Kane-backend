@@ -177,12 +177,12 @@ export const getUserHistoryForUserService = async (user: any, payload: any, res:
 	return {
 		success: true,
 		message: "User History retrieved successfully",
-		data: history?.data,
-		// pagination: {
-		// 	page,
-		// 	limit,
-		// 	total: totalHistory,
-		// },
+		data:{
+			page,
+			limit,
+			total: totalHistory,
+			data:history?.data,
+		}
 	};
 };
 
@@ -345,6 +345,8 @@ export const homePageService = async (userDetails: any, payload: any, res: Respo
 			totalMoneyEarned: user.totalMoneyEarned,
 			popularRestaurants,
 			offersAvailable,
+			barCode: user.identifier,
+			barCodeImg: user.barCode,
 		},
 	};
 };
