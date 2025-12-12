@@ -83,6 +83,7 @@ app.post("/webhook/receive", (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 });
+
 app.get("/api/user/settings", getSettings);
 app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
