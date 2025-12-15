@@ -296,9 +296,14 @@ export const getUserOfferHistoryForUserService = async (
     //   httpStatusCode.NOT_FOUND,
     //   res
     // );
+    const total = earnHistory.length;
     return {
       success: true,
       message: "No offer history found for this user",
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
       data: [],
     };
   }
@@ -314,7 +319,6 @@ export const getUserOfferHistoryForUserService = async (
   // );
 
   // Step 5: Paginate
-  const total = earnHistory.length;
   const paginatedHistory = earnHistory.slice(skip, skip + limit);
 
   return {
