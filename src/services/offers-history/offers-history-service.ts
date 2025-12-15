@@ -290,13 +290,13 @@ export const getUserOfferHistoryForUserService = async (
   //   .select("offerId")
   //   .lean();
 
+  const total = earnHistory.length;
   if (!earnHistory || earnHistory.length === 0) {
     // return errorResponseHandler(
     //   "No offer history found for this user",
     //   httpStatusCode.NOT_FOUND,
     //   res
     // );
-    const total = earnHistory.length;
     return {
       success: true,
       message: "No offer history found for this user",
