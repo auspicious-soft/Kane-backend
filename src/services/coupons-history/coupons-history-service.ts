@@ -5,6 +5,7 @@ import { couponsHistoryModel } from "../../models/coupons-history/coupons-histor
 import { usersModel } from "../../models/users/users-schema";
 import { updatePointsAndMoney } from "../users/users-service";
 import path from "path";
+import { pointsHistoryModel } from "../../models/points-history/points-history-schema";
 
 interface CouponHistory {
 	type: "earn" | "redeem";
@@ -138,21 +139,50 @@ export const getUserRedeemCouponHistoryService = async (user: any, payload: any,
 	};
 };
 
+// export const updateCouponStatusService = async (historyId: string, res: Response) => {
+// 	if (!historyId) {
+// 		return errorResponseHandler("Coupon history ID is required", httpStatusCode.BAD_REQUEST, res);
+// 	}
+// 	const updatedCouponHistory = await couponsHistoryModel.findByIdAndUpdate(historyId, { isScratched: true }, { new: true });
+
+// 	if (!updatedCouponHistory) {
+// 		return errorResponseHandler("Coupon history not found", httpStatusCode.NOT_FOUND, res);
+// 	}
+// 	return {
+// 		success: true,
+// 		message: "Coupon history updated successfully",
+// 		data: updatedCouponHistory,
+// 	};
+// };
+
+
 export const updateCouponStatusService = async (historyId: string, res: Response) => {
 	if (!historyId) {
 		return errorResponseHandler("Coupon history ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const updatedCouponHistory = await couponsHistoryModel.findByIdAndUpdate(historyId, { isScratched: true }, { new: true });
+
+	// Find and update the coupon history to scratched
+	const updatedCouponHistory:any = await couponsHistoryModel
+		.findByIdAndUpdate(historyId, { isScratched: true }, { new: true })
+		.populate("couponId"); // populate coupon details
 
 	if (!updatedCouponHistory) {
 		return errorResponseHandler("Coupon history not found", httpStatusCode.NOT_FOUND, res);
 	}
+
+	// If the coupon type is 'points', create a userPointHistory record
+	if (updatedCouponHistory.couponId?.type === "points") {
+		const points = updatedCouponHistory.couponId.points || 0;
+		await pointsHistoryModel.create({ pointsFrom: "Coupon", title: `Earned points from coupon ${updatedCouponHistory.couponId?.couponName}`, userId: updatedCouponHistory.userId, points, type: "earn" });
+	}
+
 	return {
 		success: true,
 		message: "Coupon history updated successfully",
 		data: updatedCouponHistory,
 	};
 };
+
 
 export const getUserEarnedCouponHistoryService = async (user: any, payload: any, res: Response) => {
 	const page = parseInt(payload.page as string) || 1;
@@ -166,6 +196,7 @@ export const getUserEarnedCouponHistoryService = async (user: any, payload: any,
 	if (!userCouponHistory) {
 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
 	}
+	userCouponHistory.sort((a: any, b: any) => (b.isScratched === true ? 1 : 0) - (a.isScratched === true ? 1 : 0));
 
 	return {
 		success: true,

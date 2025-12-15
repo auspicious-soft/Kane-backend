@@ -20,7 +20,7 @@ const pointsHistorySchema = new mongoose.Schema({
     },
     pointsFrom:{
       type: String,
-      enum:["REFERRAL_TO","USED_REFERRAL_CODE","SPIN","STAMPS"]
+      enum:["REFERRAL_TO","USED_REFERRAL_CODE","SPIN","STAMPS","COUPON","OFFER"],
     },
     title:{
       type:String,
