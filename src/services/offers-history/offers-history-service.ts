@@ -300,11 +300,13 @@ export const getUserOfferHistoryForUserService = async (
     return {
       success: true,
       message: "No offer history found for this user",
+      data:{
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
       data: [],
+      }
     };
   }
 
@@ -329,7 +331,6 @@ export const getUserOfferHistoryForUserService = async (
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-      // totalEarnedOffers,
       data:paginatedHistory 
     },
   };
