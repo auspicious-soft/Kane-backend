@@ -196,7 +196,7 @@ export const getUserEarnedCouponHistoryService = async (user: any, payload: any,
 	if (!userCouponHistory) {
 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
 	}
-	userCouponHistory.sort((a: any, b: any) => (b.isScratched === true ? 1 : 0) - (a.isScratched === true ? 1 : 0));
+	userCouponHistory.sort((a: any, b: any) => (b.isScratched === false ? 1 : 0) - (a.isScratched === false ? 1 : 0));
 
 	return {
 		success: true,
