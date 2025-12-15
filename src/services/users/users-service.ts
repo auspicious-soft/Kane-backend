@@ -443,32 +443,40 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
+	//TODO: user pont history add
 	if (payload.type === "points") {
 		if (payload.prize === "200 points") {
 			user.totalPoints += 200;
 			user.activePoints += 200;
 			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
-
+            await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 200, type: "earn" });
 			await user.save();
 		} else if (payload.prize === "10 points") {
 			user.totalPoints += 10;
 			user.activePoints += 10;
 			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 10, type: "earn" });
+
 			await user.save();
 		} else if (payload.prize === "50 points") {
 			user.totalPoints += 50;
 			user.activePoints += 50;
-			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);            
+			await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 50, type: "earn" });
+
 			await user.save();
 		} else if (payload.prize === "100 points") {
 			user.totalPoints += 100;
 			user.activePoints += 100;
 			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 100, type: "earn" });
 			await user.save();
 		} else if (payload.prize === "150 points") {
 			user.totalPoints += 150;
 			user.activePoints += 150;
 			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
+			await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 150, type: "earn" });
+			
 			await user.save();
 		}
 	} else if (payload.type === "coupon") {

@@ -325,7 +325,8 @@ export const getUserOfferHistoryForUserService = async (
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-      data:{ totalEarnedOffers, history:paginatedHistory, }
+      // totalEarnedOffers,
+      data:paginatedHistory 
     },
   };
 };
