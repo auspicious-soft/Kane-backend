@@ -54,6 +54,7 @@ app.use(express.static(dir));
 var uploadsDir = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadsDir));
 
+
 connectDB();
 app.get("/", (_, res: any) => {
 	res.send("Hello world entry point 🚀✅");
