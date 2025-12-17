@@ -173,7 +173,7 @@ export const updateCouponStatusService = async (historyId: string, res: Response
 	// If the coupon type is 'points', create a userPointHistory record
 	if (updatedCouponHistory.couponId?.type === "points") {
 		const points = updatedCouponHistory.couponId.points || 0;
-		await pointsHistoryModel.create({ pointsFrom: "Coupon", title: `Earned points from coupon ${updatedCouponHistory.couponId?.couponName}`, userId: updatedCouponHistory.userId, points, type: "earn" });
+		await pointsHistoryModel.create({ pointsFrom: "COUPON", title: `Earned points from coupon ${updatedCouponHistory.couponId?.couponName}`, userId: updatedCouponHistory.userId, points, type: "earn" });
 	}
 
 	return {
