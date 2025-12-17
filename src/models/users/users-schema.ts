@@ -137,6 +137,10 @@ const userSchema = new mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
+		spin: {
+			type: Number,
+			default: 0,
+		}
 	},
 	{ timestamps: true }
 );

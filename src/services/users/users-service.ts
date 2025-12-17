@@ -524,9 +524,13 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 	};
 };
 
-export const getAllSpinPrizesListService = async (req: any, res: Response) => {
+export const getAllSpinPrizesListService = async (user: any, res: Response) => {
+	const freeSpin: any = await usersModel.findOne({ _id: user._id }).select("spin");
 	return {
 		success: true,
-		data: spinPrizes,
+		data: {	
+			freeSpin: freeSpin.spin || 0,
+			spinPrizes,
+		},
 	};
 };
