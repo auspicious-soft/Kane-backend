@@ -28,7 +28,7 @@ export const getAllAchievements = async (req: Request, res: Response) => {
 };
 export const getAllRestaurantAchievements = async (req: Request, res: Response) => {
   try {
-    const response = await getAllRestaurantAchievementsService(res);
+    const response = await getAllRestaurantAchievementsService(req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);

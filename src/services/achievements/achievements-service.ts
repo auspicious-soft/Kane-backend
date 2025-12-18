@@ -34,7 +34,12 @@ export const getAllAchievementsService = async (res: Response) => {
   };
 };
 
-export const getAllRestaurantAchievementsService = async (res: Response) => {
+
+export const getAllRestaurantAchievementsService = async (
+  payload: { description?: string },
+  res: Response
+) => {
+  console.log('payload: ', payload);
   const restaurants = await RestaurantOffersModel.aggregate([
     // Step 1: Match only active offers
     { $match: { isActive: true } },
@@ -57,10 +62,24 @@ export const getAllRestaurantAchievementsService = async (res: Response) => {
       }
     },
 
-    // Step 4: Unwind to flatten the array from lookup
+    // Step 4: Unwind restaurant
     { $unwind: "$restaurant" },
 
-    // Step 5: Merge restaurant fields and offerCount into root
+    // Step 5: Search on restaurantName (if provided) 
+    ...(payload?.description
+      ? [
+          {
+            $match: {
+              "restaurant.restaurantName": {
+                $regex: payload.description,
+                $options: "i" // case-insensitive
+              }
+            }
+          }
+        ]
+      : []),
+
+    // Step 6: Merge restaurant data with offerCount
     {
       $replaceRoot: {
         newRoot: {
@@ -76,38 +95,6 @@ export const getAllRestaurantAchievementsService = async (res: Response) => {
     data: restaurants
   };
 };
-
-
-// export const getAllRestaurantAchievementsService = async (res: Response) => {
-//   const restaurants = await RestaurantOffersModel.aggregate([
-//     { $match: { isActive: true } },
-//     {
-//       $group: {
-//         _id: "$restaurantId" // Group by restaurant
-//       }
-//     },
-//     {
-//       $lookup: {
-//         from: "restaurants",           // The collection name in MongoDB
-//         localField: "_id",
-//         foreignField: "_id",
-//         as: "restaurant"
-//       }
-//     },
-//     { $unwind: "$restaurant" },
-//     {
-//       $replaceRoot: {
-//         newRoot: "$restaurant" // Flatten the result
-//       }
-//     }
-//   ]);
-
-//   return {
-//     success: true,
-//     message: "Restaurants retrieved successfully",
-//     data: restaurants
-//   };
-// };
 
 export const getAchievementsByIdService = async (achievementId: string, res: Response) => {
   if (!achievementId) {
