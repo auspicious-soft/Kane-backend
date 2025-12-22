@@ -4,7 +4,7 @@ import { httpStatusCode } from "../../lib/constant";
 import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
 import { usersModel } from "../../models/users/users-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
-import { count } from "console";
+import { UserVisitsModel } from "../../models/user-visits/user-visits";
 // import { sendNotification } from "../../utils/FCM/FCM";
 
 
@@ -18,14 +18,7 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   if (existingHistory) {
     return errorResponseHandler("Achievement already collected", httpStatusCode.BAD_REQUEST, res);
   }
-  const achievementHistory = await offersHistoryModel.create({
-    userId,
-    offerId,
-    type: "redeem",
-  });
-  if (!achievementHistory) {
-    return errorResponseHandler("Failed to create achievement history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
-  }
+
   const userData = await usersModel.findById(userId);
 
   if (!userData) {
@@ -45,10 +38,24 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   if(offer.visits > userData.visitData[existingVisitIndex].currentVisitStreak){
     return errorResponseHandler("You cannot collect this achievement", httpStatusCode.NOT_FOUND, res);
   }
+  
   userData.visitData[existingVisitIndex].currentVisitStreak -= offer.visits;
-
+  const achievementHistory = await offersHistoryModel.create({
+    userId,
+    offerId,
+    type: "redeem",
+  });
+  const stamps = await UserVisitsModel.find({ restaurantId: restaurant, userId: userId, visitUsed: false}).populate("restaurantId").sort({createdAt:1}).limit(offer.visits);
+  const stampIds = stamps.map(stamp => stamp._id);
+  await UserVisitsModel.updateMany(
+    { _id: { $in: stampIds } },
+    { $set: { visitUsed: true } }
+  );
+  if (!achievementHistory) {
+    return errorResponseHandler("Failed to create achievement history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
+  }
   await userData.save();
-      // await sendNotification({userIds:[userId], type: "Stamp_Collected"});
+  // await sendNotification({userIds:[userId], type: "Stamp_Collected"});
   
   return {
     success: true,

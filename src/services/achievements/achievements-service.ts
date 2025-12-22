@@ -6,6 +6,7 @@ import { usersModel } from "../../models/users/users-schema";
 import { UserVisitsModel } from "../../models/user-visits/user-visits";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
+import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
 
 
 export const createAchievementsService = async (payload: any, res: Response) => {
@@ -116,7 +117,7 @@ export const getUserStampsByRestaurantIdService = async (userData: any, restaura
   if (!restaurantId) {
     return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const stamps = await UserVisitsModel.find({ restaurantId: restaurantId, userId: userData.id }).populate("restaurantId").sort({createdAt:-1});
+  const stamps = await UserVisitsModel.find({ restaurantId: restaurantId, userId: userData.id, visitUsed: false }).populate("restaurantId").sort({ createdAt: 1 });
 
   if (!stamps) {
     return errorResponseHandler("Stamps not found", httpStatusCode.NOT_FOUND, res);
@@ -154,8 +155,16 @@ export const getAchievementsByRestaurantIdService = async (userData: any, restau
   if (!restaurantId) {
     return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  const restaurant = await RestaurantOffersModel.find({ restaurantId: restaurantId }).populate("restaurantId").sort({createdAt:-1});
-
+  let restaurant = await RestaurantOffersModel.find({ restaurantId: restaurantId }).populate("restaurantId").sort({createdAt:-1});
+  const collectedStamps = await offersHistoryModel.find({ userId: userData.id, type: "redeem" }).sort({createdAt:1});
+  console.log('collectedStamps: ', collectedStamps);
+  if (collectedStamps.length !== 0) {
+    const stampIds = collectedStamps.map(stamp => stamp.offerId.toString());
+    console.log('stampIds: ', stampIds);
+    
+    // Filter out collected achievements
+    restaurant = restaurant.filter((rest: any) => !stampIds.includes(rest._id.toString()));
+  }
   if (!restaurant) {
     return errorResponseHandler("Restaurant not found", httpStatusCode.NOT_FOUND, res);
   }

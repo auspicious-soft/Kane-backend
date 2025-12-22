@@ -18,6 +18,10 @@ const userVisitsSchema = new mongoose.Schema(
             type: Types.ObjectId,
             ref: "user",
         },
+		visitUsed: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: true }
 );
