@@ -443,6 +443,9 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
+	if (user.spin <= 0) {
+		return errorResponseHandler("No spins available", httpStatusCode.BAD_REQUEST, res);
+	}
 	//TODO: user pont history add
 	if (payload.type === "points") {
 		if (payload.prize === "200 points") {
