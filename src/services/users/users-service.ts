@@ -518,6 +518,8 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 	if (payload.type !== "message" && payload.prize !== "Better luck next time") {
 		// await sendNotification({ userIds: [user._id], type: "Won_Reward"});
 	}
+	user.spin = user.spin - 1;
+	await user.save();
 	return {
 		success: true,
 		message: "Spin prize processed successfully",
