@@ -88,8 +88,9 @@ export const getAllNotificationsOfUserService = async (userData: any, res: Respo
 		if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 
 		const results = await notificationsModel.find({ userIds: userData.id }).sort({ createdAt: -1 }).select("-__v -userId");
+		const unreadNotifications = await notificationsModel.countDocuments({ userIds: userData.id, isRead: false });
 
-		return { success: true, message: "Notifications fetched successfully", data: results };
+		return { success: true, message: "Notifications fetched successfully", data: results, unreadNotifications };
 	} catch (error) {
 		console.error("Error in getAllNotificationsOfUserService:", error);
 		throw error;
