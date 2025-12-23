@@ -16,6 +16,7 @@ import { createEposNowService } from "./services/epos/epos-service";
 import "../src/crons/freeSpin.cron"
 import { webhookService } from "./services/webhook/webhook-service";
 import { initializeFirebase } from "./utils/FCM/FCM";
+import { sendNotificationToUser } from "./controllers/notifications/notifications-controller";
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url); // <-- Define __filename
@@ -88,6 +89,7 @@ app.post("/webhook/receive", (req, res) => {
 app.get("/api/user/settings", getSettings);
 app.use("/api/admin", checkValidAdminRole, admin);
 app.use("/api/user", checkAuth, user);
+app.post("/api/notifications", sendNotificationToUser);
 app.use("/api/epos", epos);
 app.post("/api/login", login);
 app.post("/api/logout", logout);

@@ -5,7 +5,7 @@ import { offersHistoryModel } from "../../models/offers-history/offers-history-s
 import { usersModel } from "../../models/users/users-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { UserVisitsModel } from "../../models/user-visits/user-visits";
-// import { sendNotification } from "../../utils/FCM/FCM";
+import { sendNotification } from "../../utils/FCM/FCM";
 
 
 
@@ -55,7 +55,7 @@ export const collectAchievementService = async (payload: any, res: Response) => 
     return errorResponseHandler("Failed to create achievement history", httpStatusCode.INTERNAL_SERVER_ERROR, res);
   }
   await userData.save();
-  // await sendNotification({userIds:[userId], type: "Stamp_Collected"});
+  await sendNotification({userIds:[userId], type: "Stamp_Collected"});
   
   return {
     success: true,

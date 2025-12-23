@@ -1,60 +1,58 @@
-// import { Request, Response } from "express";
-// import { httpStatusCode } from "src/lib/constant";
-// import { errorParser } from "src/lib/errors/error-response-handler";
-// import { getAllNotificationsOfUserService, markAllNotificationsAsReadService, markNotificationsAsReadService, sendNotificationToUserService, sendNotificationToUsersService } from "src/services/notifications/notifications-service";
-// import { sendNotificationToUserSchema, } from "src/validation/admin-user";
-// import { formatZodErrors } from "src/validation/format-zod-errors";
+import { Request, Response } from "express";
+import { errorParser } from "../../lib/errors/error-response-handler";
+import { httpStatusCode } from "../../lib/constant";
+import { getAllNotificationsOfUserService, markAllNotificationsAsReadService, markNotificationsAsReadService, sendNotificationToUserService, sendNotificationToUsersService } from "../../services/notifications/notifications-service";
 
-// export const sendNotificationToUsers = async (req: Request, res: Response) => {
-//     // const validation = sendNotificationToUserSchema.safeParse(req.body)
-//     // if (!validation.success) return res.status(httpStatusCode.BAD_REQUEST).json({ success: false, message: formatZodErrors(validation.error) })
-//     try {
-//         const response = await sendNotificationToUsersService(req.body, res)
-//         return res.status(httpStatusCode.CREATED).json(response)
-//     } catch (error: any) {
-//         const { code, message } = errorParser(error)
-//         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-//     }
-// }
+export const sendNotificationToUsers = async (req: Request, res: Response) => {
+    // const validation = sendNotificationToUserSchema.safeParse(req.body)
+    // if (!validation.success) return res.status(httpStatusCode.BAD_REQUEST).json({ success: false, message: formatZodErrors(validation.error) })
+    try {
+        const response = await sendNotificationToUsersService(req.body, res)
+        return res.status(httpStatusCode.CREATED).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
+    }
+}
 
 
-// export const sendNotificationToUser = async (req: Request, res: Response) => {
-//     // const validation = sendNotificationToUserSchema.safeParse(req.body)
-//     // if (!validation.success) return res.status(httpStatusCode.BAD_REQUEST).json({ success: false, message: formatZodErrors(validation.error) })
-//     try {
-//         const response = await sendNotificationToUserService(req.body, res)
-//         return res.status(httpStatusCode.CREATED).json(response)
-//     } catch (error: any) {
-//         const { code, message } = errorParser(error)
-//         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-//     }
-// }
+export const sendNotificationToUser = async (req: Request, res: Response) => {
+    // const validation = sendNotificationToUserSchema.safeParse(req.body)
+    // if (!validation.success) return res.status(httpStatusCode.BAD_REQUEST).json({ success: false, message: formatZodErrors(validation.error) })
+    try {
+        const response = await sendNotificationToUserService(req.body, res)
+        return res.status(httpStatusCode.CREATED).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
+    }
+}
 
-// export const getAllNotificationsOfUser = async (req: Request, res: Response) => {
-//     try {
-//         const response = await getAllNotificationsOfUserService(req.user, res)
-//         return res.status(httpStatusCode.OK).json(response)
-//     } catch (error: any) {
-//         const { code, message } = errorParser(error)
-//         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-//     }
-// }
+export const getAllNotificationsOfUser = async (req: Request, res: Response) => {
+    try {
+        const response = await getAllNotificationsOfUserService(req.user, res)
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
+    }
+}
 
-// export const markAllNotificationsAsRead = async (req: Request, res: Response) => {
-//     try {
-//         const response = await markAllNotificationsAsReadService(req.user, res)
-//         return res.status(httpStatusCode.OK).json(response)
-//     } catch (error: any) {
-//         const { code, message } = errorParser(error)
-//         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-//     }
-// }
-// export const markNotificationsAsRead = async (req: Request, res: Response) => {
-//     try {
-//         const response = await markNotificationsAsReadService(req.user, req.params.id, res)
-//         return res.status(httpStatusCode.OK).json(response)
-//     } catch (error: any) {
-//         const { code, message } = errorParser(error)
-//         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-//     }
-// }
+export const markAllNotificationsAsRead = async (req: Request, res: Response) => {
+    try {
+        const response = await markAllNotificationsAsReadService(req.user, res)
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
+    }
+}
+export const markNotificationsAsRead = async (req: Request, res: Response) => {
+    try {
+        const response = await markNotificationsAsReadService(req.user, req.params.id, res)
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
+    }
+}

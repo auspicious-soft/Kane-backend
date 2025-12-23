@@ -54,7 +54,12 @@ export const sendNotification = async ({
   adminDescription,
   referenceId
 }: SendNotificationParams) => {
-// export const sendNotification = async (userIds: any[], type: string, adminTitle?: any, adminDescription?: any, referenceId?: any) => {
+	// export const sendNotification = async (userIds: any[], type: string, adminTitle?: any, adminDescription?: any, referenceId?: any) => {
+		console.log(
+		type,
+		adminTitle,
+		adminDescription,
+		referenceId);
 
 	try {
 		// pick message template
@@ -80,23 +85,25 @@ export const sendNotification = async ({
 
 			let finalTitle: string | undefined;
 			let finalDescription: string | undefined;
-
+			
 			if (type === "admin") {
 				// Use adminTitle and adminDescription based on userLanguage
 				if (!adminTitle || !adminDescription) {
 					console.error(`❌ Missing adminTitle or adminDescription for admin notification`);
 					continue;
 				}
-				finalTitle = adminTitle[userLanguage] || adminTitle["eng"];
-				finalDescription = adminDescription[userLanguage] || adminDescription["eng"];
-    
+				finalTitle = adminTitle;
+				finalDescription = adminDescription;
+				
 			} else {
 				// Use regular notification template
-				const messageTemplate = notificationMessages[userLanguage]?.[type];
+				const messageTemplate = notificationMessages["eng"]?.[type];
 				finalTitle =  messageTemplate?.title;
 				finalDescription = messageTemplate?.description;
 			}
-
+			
+			console.log('finalDescription: ', finalDescription);
+			console.log('finalTitle: ', finalTitle);
 			// Save notification in DB
 			const notificationDoc = await notificationsModel.create({
 				userIds: userId,

@@ -19,7 +19,7 @@ import { getUserCouponHistoryforAdminService, getUserCouponHistoryService, getUs
 import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
 import { couponsModel } from "../../models/coupons/coupons-schema";
 import { getUserVisitsService } from "../achievements/achievements-service";
-// import { sendNotification } from "../../utils/FCM/FCM";
+import { sendNotification } from "../../utils/FCM/FCM";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -473,13 +473,14 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 			user.activePoints += 100;
 			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
 			await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 100, type: "earn" });
+			await sendNotification({ userIds: [user._id], type: "Won_Reward"});
 			await user.save();
 		} else if (payload.prize === "150 points") {
 			user.totalPoints += 150;
 			user.activePoints += 150;
 			await updatePointsAndMoney(user._id, user.valuePerPoint, user.totalPoints);
 			await pointsHistoryModel.create({ pointsFrom: "SPIN", title: `You won ${payload.prize} from spin.`, userId: user._id, points: 150, type: "earn" });
-			
+			await sendNotification({ userIds: [user._id], type: "Won_Reward"});
 			await user.save();
 		}
 	} else if (payload.type === "coupon") {
@@ -512,6 +513,7 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 			selectedCoupon = availableCoupons[randomIndex];
 			console.log("selectedCoupon: ", selectedCoupon);
 			await couponsHistoryModel.create({ userId: user._id, couponId: selectedCoupon._id, type: "earn" });
+			await sendNotification({ userIds: [user._id], type: "Won_Reward"});
 		}
 
 		// 👉 selectedCoupon will be either a coupon object or null if none available
@@ -519,7 +521,6 @@ export const getSpinPrizesService = async (userData: any, payload: any, res: Res
 		// No action needed for message type
 	}
 	if (payload.type !== "message" && payload.prize !== "Better luck next time") {
-		// await sendNotification({ userIds: [user._id], type: "Won_Reward"});
 	}
 	user.spin = user.spin - 1;
 	await user.save();

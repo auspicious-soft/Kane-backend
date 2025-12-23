@@ -7,6 +7,7 @@ import { createPointsHistory } from "../controllers/points-history/points-histor
 import { createCouponsHistory, getUserEarnedCouponHistory, getUserRedeemCouponHistory, updateCouponStatus } from "../controllers/coupons-history/coupons-history-controller";
 import { getAchievementsByRestaurantId, getAllRestaurantAchievements, getUserStampsByRestaurantId, getUserVisits } from "../controllers/achievements/achievements-controller";
 import { updateCouponStatusService } from "../services/coupons-history/coupons-history-service";
+import { getAllNotificationsOfUser, markAllNotificationsAsRead, markNotificationsAsRead, sendNotificationToUser } from "../controllers/notifications/notifications-controller";
 
 const router = Router();
 //current User ROUTES
@@ -59,6 +60,11 @@ router.put("/coupons-scratch/:id", updateCouponStatus);
 router.post("/spin-prizes", getSpinPrizes);
 router.get("/spin-prizes", getAllSpinPrizesList);
 
+//notification routes
+router.get("/notifications", getAllNotificationsOfUser);
+// router.post("/notifications", sendNotificationToUser);
+router.put("/notifications/mark-all-read", markAllNotificationsAsRead);
+router.put("/notifications/mark-read/:id", markNotificationsAsRead);
 
 
 
