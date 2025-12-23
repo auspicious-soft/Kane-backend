@@ -102,8 +102,7 @@ export const sendNotification = async ({
 				finalDescription = messageTemplate?.description;
 			}
 			
-			console.log('finalDescription: ', finalDescription);
-			console.log('finalTitle: ', finalTitle);
+
 			// Save notification in DB
 			const notificationDoc = await notificationsModel.create({
 				userIds: userId,
