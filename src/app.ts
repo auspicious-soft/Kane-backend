@@ -15,7 +15,7 @@ import { Error } from "mongoose";
 import { createEposNowService } from "./services/epos/epos-service";
 import "../src/crons/freeSpin.cron"
 import { webhookService } from "./services/webhook/webhook-service";
-// import { initializeFirebase } from "./utils/FCM/FCM";
+import { initializeFirebase } from "./utils/FCM/FCM";
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url); // <-- Define __filename
@@ -38,7 +38,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// initializeFirebase();
+initializeFirebase();
 
 app.use(
 	cors({

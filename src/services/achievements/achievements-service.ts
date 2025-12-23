@@ -157,10 +157,8 @@ export const getAchievementsByRestaurantIdService = async (userData: any, restau
   }
   let restaurant = await RestaurantOffersModel.find({ restaurantId: restaurantId }).populate("restaurantId").sort({createdAt:-1});
   const collectedStamps = await offersHistoryModel.find({ userId: userData.id, type: "redeem" }).sort({createdAt:1});
-  console.log('collectedStamps: ', collectedStamps);
   if (collectedStamps.length !== 0) {
     const stampIds = collectedStamps.map(stamp => stamp.offerId.toString());
-    console.log('stampIds: ', stampIds);
     
     // Filter out collected achievements
     restaurant = restaurant.filter((rest: any) => !stampIds.includes(rest._id.toString()));
