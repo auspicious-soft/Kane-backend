@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "DNW8PBF68X.com.aus.olivers",
+        "paths": [ "/invite/*", "/invite", "/*" ]
+      }
+    ]
+  }
+}
