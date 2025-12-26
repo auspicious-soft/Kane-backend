@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.aus.olivers",
+      "sha256_cert_fingerprints": [
+        "C3:3A:F1:94:88:AA:9F:DA:F1:80:70:B2:31:D2:C5:0A:33:20:DC:DE:65:59:28:1A:B4:2B:41:CC:F5:B6:CD:97",
+        "87:F7:ED:2F:19:AC:00:27:05:E1:A6:AE:65:38:32:EA:98:3A:45:86:7F:08:66:2B:CE:29:6B:A1:B0:EE:B1:0F"
+      ]
+    }
+  }
+]
