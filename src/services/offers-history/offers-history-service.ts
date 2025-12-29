@@ -14,7 +14,7 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   if (!userId || !offerId  ) {
     return errorResponseHandler("All achievement history fields are required", httpStatusCode.BAD_REQUEST, res);
   }
-  const existingHistory = await offersHistoryModel.findOne({ userId, offerId, type: "redeem" });
+  const existingHistory = await offersHistoryModel.findOne({ userId, offerId, type: "earn" });
   if (existingHistory) {
     return errorResponseHandler("Achievement already collected", httpStatusCode.BAD_REQUEST, res);
   }
@@ -43,7 +43,7 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   const achievementHistory = await offersHistoryModel.create({
     userId,
     offerId,
-    type: "redeem",
+    type: "earn",
   });
   const stamps = await UserVisitsModel.find({ restaurantId: restaurant, userId: userId, visitUsed: false}).populate("restaurantId").sort({createdAt:1}).limit(offer.visits);
   const stampIds = stamps.map(stamp => stamp._id);
