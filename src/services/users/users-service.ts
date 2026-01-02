@@ -29,10 +29,10 @@ export const getAllUsersService = async (payload: any) => {
 	const offset = (page - 1) * limit;
 
 	// Get search query from queryBuilder
-	let { query, sort } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
+	let { query } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
 
 	const totalUsers = await usersModel.countDocuments(query);
-	const users = await usersModel.find(query).sort(sort).skip(offset).limit(limit).select("-password");
+	const users = await usersModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).select("-password");
 
 	return {
 		success: true,
@@ -225,12 +225,13 @@ export const getUserPointHistoryService = async (userData: any, res: Response) =
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
-	const pointsHistory = await pointsHistoryModel.find({ userId: userData.id }).populate({ path: "restaurantId", select: "" });
+	const pointsHistory = (await pointsHistoryModel.find({ userId: userData.id }).sort({ createdAt: -1 }).populate({ path: "restaurantId", select: "" }));
+	console.log('pointsHistory: ', pointsHistory);
 	return {
 		success: true,
 		message: "User points history retrieved successfully",
 		data: {
-			totalPoints: user.totalPoints,
+			totalPoints: user.activePoints,
 			currency: user.currency,
 			totalMoneyEarned: user.totalMoneyEarned,
 			pointsHistory,
@@ -321,7 +322,7 @@ export const changePasswordService = async (userDetails: any, payload: any, res:
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
 		await usersModel.findByIdAndUpdate(user._id, { password: hashedPassword }, { new: true });
 	} else {
-		return errorResponseHandler("Old password does not match", httpStatusCode.CONFLICT, res);
+		return errorResponseHandler("Old password does not match", httpStatusCode.BAD_REQUEST, res);
 	}
 	return {
 		success: true,
@@ -340,7 +341,7 @@ export const homePageService = async (userDetails: any, payload: any, res: Respo
 		success: true,
 		data: {
 			userName: user.fullName,
-			totalPoints: user.totalPoints,
+			totalPoints: user.activePoints,
 			currency: user.currency,
 			totalMoneyEarned: user.totalMoneyEarned,
 			popularRestaurants,

@@ -32,6 +32,10 @@ export const loginService = async (payload: any, res: Response) => {
 		}
 	}
 	if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+	const isPasswordValid = await bcrypt.compare(password, user.password);
+	if (!isPasswordValid) {
+		return errorResponseHandler("Invalid password", httpStatusCode.BAD_REQUEST, res);
+	}
 	if (user.isDeleted === true) return errorResponseHandler("User Not Found", httpStatusCode.FORBIDDEN, res);
 	if (userType === "user" && user.isBlocked) {
 		return errorResponseHandler("User account is suspended", httpStatusCode.FORBIDDEN, res);
@@ -48,10 +52,7 @@ export const loginService = async (payload: any, res: Response) => {
 			return { success: true, message: "Your email is not verified. Verification email sent with otp", data: { user, token: null } };
 		}
 	}
-	const isPasswordValid = await bcrypt.compare(password, user.password);
-	if (!isPasswordValid) {
-		return errorResponseHandler("Invalid password", httpStatusCode.UNAUTHORIZED, res);
-	}
+	
 	const userObject = user.toObject() as typeof user & { password?: string };
 	userObject.fcmToken = fcmToken;
 	if (fcmToken) {

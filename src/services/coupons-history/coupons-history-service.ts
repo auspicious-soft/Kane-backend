@@ -113,48 +113,111 @@ export const getUserCouponHistoryService = async (userId: string, res: Response)
 		data: userCouponHistory,
 	};
 };
-export const getUserRedeemCouponHistoryService = async (user: any, payload: any, res: Response) => {
-	const page = parseInt(payload.page as string) || 1;
-	const limit = parseInt(payload.limit as string) || 10;
-	const offset = (page - 1) * limit;
-	if (!user.id) {
-		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
-	}
-	const userCouponHistory = await couponsHistoryModel.find({ userId: user.id, type: "redeem" }).skip(offset).limit(limit).populate("couponId");
-	const total = await couponsHistoryModel.countDocuments({ userId: user.id, type: "redeem" });
-	if (!userCouponHistory) {
-		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
-	}
-
-	return {
-		success: true,
-		message: "User coupon history retrieved successfully",
-		data: {
-			total,
-			page,
-			limit,
-			totalPages: Math.ceil(total / limit),
-			data: userCouponHistory
-		}
-	};
-};
-
-// export const updateCouponStatusService = async (historyId: string, res: Response) => {
-// 	if (!historyId) {
-// 		return errorResponseHandler("Coupon history ID is required", httpStatusCode.BAD_REQUEST, res);
+// export const getUserRedeemCouponHistoryService = async (user: any, payload: any, res: Response) => {
+// 	const page = parseInt(payload.page as string) || 1;
+// 	const limit = parseInt(payload.limit as string) || 10;
+// 	const offset = (page - 1) * limit;
+// 	if (!user.id) {
+// 		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
 // 	}
-// 	const updatedCouponHistory = await couponsHistoryModel.findByIdAndUpdate(historyId, { isScratched: true }, { new: true });
-
-// 	if (!updatedCouponHistory) {
-// 		return errorResponseHandler("Coupon history not found", httpStatusCode.NOT_FOUND, res);
+// 	const userCouponHistory = await couponsHistoryModel.find({ userId: user.id, type: "redeem" }).skip(offset).limit(limit).populate("couponId");
+// 	const total = await couponsHistoryModel.countDocuments({ userId: user.id, type: "redeem" });
+// 	if (!userCouponHistory) {
+// 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
 // 	}
+
 // 	return {
 // 		success: true,
-// 		message: "Coupon history updated successfully",
-// 		data: updatedCouponHistory,
+// 		message: "User coupon history retrieved successfully",
+// 		data: {
+// 			total,
+// 			page,
+// 			limit,
+// 			totalPages: Math.ceil(total / limit),
+// 			data: userCouponHistory
+// 		}
 // 	};
 // };
 
+export const getUserRedeemCouponHistoryService = async (
+  user: any,
+  payload: any,
+  res: Response
+) => {
+  if (!user.id) {
+    return errorResponseHandler(
+      "User ID is required",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
+  }
+
+  const page = Number(payload.page) > 0 ? Number(payload.page) : 1;
+  const limit = Number(payload.limit) > 0 ? Number(payload.limit) : 10;
+  const skip = (page - 1) * limit;
+
+  // Step 1: Fetch all coupon history for user
+  const history = await couponsHistoryModel
+  .find({ userId: user.id })
+  .populate("couponId")
+  .lean();
+
+  // Step 2: Fetch all redeemed coupons
+  const redeemHistory = await couponsHistoryModel
+    .find({ userId: user.id, type: "redeem" })
+    .populate("couponId")
+    .lean();
+
+  let total = history.length;
+
+  if (!history || history.length === 0) {
+    return {
+      success: true,
+      message: "No coupon history found for this user",
+      data: {
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+        data: [],
+      },
+    };
+  }
+
+  // Step 3: Extract redeemed coupon IDs
+  const redeemedCouponIds = new Set(
+    redeemHistory.map((entry: any) => String(entry?.couponId?._id))
+  );
+
+  // Step 4: Filter earned coupons (remove redeemed ones)
+  const filteredEarnHistory = history.filter(
+    (entry: any) =>
+      (!redeemedCouponIds.has(String(entry?.couponId?._id)) && ( entry?.isScratched === true))
+  );
+
+  // Step 5: Paginate based on type
+  let paginatedHistory;
+
+  if (payload.type === "redeem") {
+    total = redeemHistory.length;
+    paginatedHistory = redeemHistory.slice(skip, skip + limit);
+  } else {
+    total = filteredEarnHistory.length;
+    paginatedHistory = filteredEarnHistory.slice(skip, skip + limit);
+  }
+
+  return {
+    success: true,
+    message: "User coupon history retrieved successfully",
+    data: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data: paginatedHistory,
+    },
+  };
+};
 
 export const updateCouponStatusService = async (historyId: string, res: Response) => {
 	if (!historyId) {
@@ -174,6 +237,8 @@ export const updateCouponStatusService = async (historyId: string, res: Response
 	if (updatedCouponHistory.couponId?.type === "points") {
 		const points = updatedCouponHistory.couponId.points || 0;
 		await pointsHistoryModel.create({ pointsFrom: "COUPON", title: `Earned points from coupon ${updatedCouponHistory.couponId?.couponName}`, userId: updatedCouponHistory.userId, points, type: "earn" });
+	    await couponsHistoryModel
+		.findByIdAndUpdate(historyId, { type: "redeem" }, { new: true }) 
 	}
 
 	return {
@@ -191,8 +256,8 @@ export const getUserEarnedCouponHistoryService = async (user: any, payload: any,
 	if (!user.id) {
 		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const userCouponHistory = await couponsHistoryModel.find({ userId: user.id, type: "earn" }).skip(offset).limit(limit).populate("couponId");
-	const total = await couponsHistoryModel.countDocuments({ userId: user.id, type: "earn" });
+	const userCouponHistory = await couponsHistoryModel.find({ userId: user.id, type: "earn", isScratched: false }).skip(offset).limit(limit).populate("couponId");
+	const total = await couponsHistoryModel.countDocuments({ userId: user.id, type: "earn", isScratched: false });
 	if (!userCouponHistory) {
 		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
 	}
@@ -237,7 +302,7 @@ export const getUserCouponHistoryforAdminService = async (
   // Step 2: Fetch all "redeem" entries
   const redeemHistory = await couponsHistoryModel
     .find({ userId, type: "redeem" })
-    .select("couponId")
+    .populate({ path: "couponId", populate: { path: "offerName" } })
     .lean();
 
   if (!earnHistory || earnHistory.length === 0) {
@@ -259,15 +324,20 @@ export const getUserCouponHistoryforAdminService = async (
 	);
 
   // Step 5: Paginate
-  const total = filteredEarnHistory.length;
-  const paginatedHistory = filteredEarnHistory.slice(skip, skip + limit);
+  let total = filteredEarnHistory.length;
+  let paginatedHistory = filteredEarnHistory.slice(skip, skip + limit);
+  if(payload.type==="redeem"){
+	total = redeemHistory.length;
+	paginatedHistory = redeemHistory.slice(skip, skip + limit);
+}
+
 
   // Step 6: Return paginated result
   return {
     success: true,
     message: "User coupon history retrieved successfully",
     data: { 
-		total,
+	  total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
