@@ -151,7 +151,7 @@ export const signupService = async (payload: any, res: Response) => {
 	let retries = 3;
 	let user;
 	if (existingUser) {
-		return errorResponseHandler("User already exists", httpStatusCode.CONFLICT, res);
+		return errorResponseHandler("User already exists", httpStatusCode.BAD_REQUEST, res);
 	}
 	// Prevent signup for admin emails
 	let existingAdmin = await adminModel.findOne({ email: email });
