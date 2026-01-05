@@ -20,6 +20,7 @@ import { couponsHistoryModel } from "../../models/coupons-history/coupons-histor
 import { couponsModel } from "../../models/coupons/coupons-schema";
 import { getUserVisitsService } from "../achievements/achievements-service";
 import { sendNotification } from "../../utils/FCM/FCM";
+import { notificationsModel } from "../../models/notifications/notification-schema";
 
 const eposNowService = createEposNowService();
 // Get All Users
@@ -387,7 +388,7 @@ export const homePageService = async (userDetails: any, payload: any, res: Respo
 
 	const popularRestaurants = await RestaurantsModel.find({ isDeleted: false }).limit(10);
 	const offersAvailable = await RestaurantOffersModel.find().limit(10).populate("restaurantId");
-
+    const readNotificationCount = await notificationsModel.find({ userIds: user._id, isRead: false }).countDocuments();
 	return {
 		success: true,
 		data: {
@@ -399,6 +400,7 @@ export const homePageService = async (userDetails: any, payload: any, res: Respo
 			offersAvailable,
 			barCode: user.identifier,
 			barCodeImg: user.barCode,
+			readNotificationCount,
 		},
 	};
 };
