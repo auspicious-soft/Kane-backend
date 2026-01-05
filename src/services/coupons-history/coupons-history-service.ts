@@ -191,10 +191,10 @@ export const getUserRedeemCouponHistoryService = async (
 
   // Step 4: Filter earned coupons (remove redeemed ones)
   const filteredEarnHistory = history.filter(
-    (entry: any) =>
-      (!redeemedCouponIds.has(String(entry?.couponId?._id)) && ( entry?.isScratched === true))
-  );
-
+	  (entry: any) =>
+		(!redeemedCouponIds.has(String(entry?.couponId?._id)) && ( entry?.isScratched === true))
+	);
+	
   // Step 5: Paginate based on type
   let paginatedHistory;
 
@@ -204,7 +204,7 @@ export const getUserRedeemCouponHistoryService = async (
   } else {
     total = filteredEarnHistory.length;
     paginatedHistory = filteredEarnHistory.slice(skip, skip + limit);
-  }
+}
 
   return {
     success: true,

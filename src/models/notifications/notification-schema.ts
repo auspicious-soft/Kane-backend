@@ -24,7 +24,7 @@ const notificationsSchema = new Schema({
     type: {
         type: String,
         required: true,
-        enum: ["admin", "user", "Stamp_collected","Redeem_Points","Referral_Used","Won_Reward","Redeem_Coupon"]
+        enum: ["admin", "user", "Stamp_Collected","Redeem_Points","Referral_Used","Won_Reward","Redeem_Coupon"]
     },
     language: { type: String, enum: ["eng", "kaz", "rus"], default: "eng" },
     metadata: { type: Schema.Types.Mixed },

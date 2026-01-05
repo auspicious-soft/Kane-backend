@@ -97,7 +97,7 @@ export const convertToBoolean = (value: string) => {
       title: "Points Redeemed",
       description: "Points have been redeemed.",
     },
-    Stamp_collected: {
+    Stamp_Collected: {
       title: "Stamp Collected",
       description: "You've collected a new stamp!",
     },
