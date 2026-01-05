@@ -62,7 +62,7 @@ router.get("/spin-prizes", getAllSpinPrizesList);
 
 //notification routes
 router.get("/notifications", getAllNotificationsOfUser);
-// router.post("/notifications", sendNotificationToUser);
+router.post("/notifications", sendNotificationToUser);
 router.put("/notifications/mark-all-read", markAllNotificationsAsRead);
 router.put("/notifications/mark-read/:id", markNotificationsAsRead);
 

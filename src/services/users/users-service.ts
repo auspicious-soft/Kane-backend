@@ -31,8 +31,8 @@ export const getAllUsersService = async (payload: any) => {
 	// Get search query from queryBuilder
 	let { query } = queryBuilder(payload, ["fullName", "email", "firstName", "lastName"]);
 
-	const totalUsers = await usersModel.countDocuments(query);
-	const users = await usersModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).select("-password");
+	const totalUsers = await usersModel.countDocuments({...query,isDeleted: false});
+	const users = await usersModel.find({...query,isDeleted: false}).sort({ createdAt: -1 }).skip(offset).limit(limit).select("-password");
 
 	return {
 		success: true,
@@ -81,6 +81,7 @@ export const getUserByIdService = async (id: string, res: Response) => {
 	if (!user) {
 		return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 	}
+	
 	return {
 		success: true,
 		message: "User retrieved successfully",
@@ -127,16 +128,66 @@ export const getUserHistoryService = async (id: string, payload: any, res: Respo
 			.limit(limit)
 			.populate("restaurantId");
 	} else if (payload.type === "offer") {
-		totalHistory = await offersHistoryModel.countDocuments(query);
-		history = await offersHistoryModel
+
+
+		const allHistory = await offersHistoryModel
 			.find(query)
 			.sort({ createdAt: -1 })
-			.skip(offset)
-			.limit(limit)
 			.populate({
 				path: "offerId",
 				populate: [{ path: "restaurantId", select: { restaurantName: 1, image: 1 } }],
 			});
+
+		// Group by offerId
+		const groupedMap = new Map();
+		
+		allHistory.forEach((entry: any) => {
+			const offerIdKey = entry.offerId?._id?.toString();
+			
+			if (!offerIdKey) return;
+			
+			if (!groupedMap.has(offerIdKey)) {
+				groupedMap.set(offerIdKey, {
+					_id: entry._id,
+					offerId: entry.offerId,
+					userId: entry.userId,
+					identifier: entry.identifier,
+					earnedAt: null,
+					redeemedAt: null,
+					__v: entry.__v,
+				});
+			}
+			
+			const grouped = groupedMap.get(offerIdKey);
+			
+			if (entry.type === "earn") {
+				grouped.earnedAt = entry.createdAt;
+				// Keep the earn entry's _id and identifier if it's the first one
+				if (!grouped.earnedAt || entry.createdAt < grouped.earnedAt) {
+					grouped._id = entry._id;
+					grouped.identifier = entry.identifier;
+				}
+			} else if (entry.type === "redeem") {
+				grouped.redeemedAt = entry.createdAt;
+			}
+		});
+
+		// Convert map to array and sort by most recent activity
+		const groupedHistory = Array.from(groupedMap.values()).sort((a: any, b: any) => {
+			const aTime = Math.max(
+				a.earnedAt ? new Date(a.earnedAt).getTime() : 0,
+				a.redeemedAt ? new Date(a.redeemedAt).getTime() : 0
+			);
+			const bTime = Math.max(
+				b.earnedAt ? new Date(b.earnedAt).getTime() : 0,
+				b.redeemedAt ? new Date(b.redeemedAt).getTime() : 0
+			);
+			return bTime - aTime;
+		});
+
+		// Apply pagination after grouping
+		totalHistory = groupedHistory.length;
+		history = groupedHistory.slice(offset, offset + limit);
 	} else {
 		totalHistory = await offersHistoryModel.countDocuments(query);
 		history = await offersHistoryModel.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).populate("offerId");

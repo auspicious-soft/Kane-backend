@@ -140,6 +140,10 @@ const userSchema = new mongoose.Schema(
 		spin: {
 			type: Number,
 			default: 0,
+		},
+		totalStampsCollected: {
+			type: Number,
+			default: 0
 		}
 	},
 	{ timestamps: true }

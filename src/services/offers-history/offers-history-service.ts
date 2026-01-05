@@ -40,6 +40,7 @@ export const collectAchievementService = async (payload: any, res: Response) => 
   }
   
   userData.visitData[existingVisitIndex].currentVisitStreak -= offer.visits;
+  userData.totalStampsCollected += 1;
   const achievementHistory = await offersHistoryModel.create({
     userId,
     offerId,

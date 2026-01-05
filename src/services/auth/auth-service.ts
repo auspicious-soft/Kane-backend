@@ -36,7 +36,7 @@ export const loginService = async (payload: any, res: Response) => {
 	if (!isPasswordValid) {
 		return errorResponseHandler("Invalid password", httpStatusCode.BAD_REQUEST, res);
 	}
-	if (user.isDeleted === true) return errorResponseHandler("User Not Found", httpStatusCode.FORBIDDEN, res);
+	if (user.isDeleted === true) return errorResponseHandler("User account is deleted. Please contact admin", httpStatusCode.FORBIDDEN, res);
 	if (userType === "user" && user.isBlocked) {
 		return errorResponseHandler("User account is suspended", httpStatusCode.FORBIDDEN, res);
 	}
