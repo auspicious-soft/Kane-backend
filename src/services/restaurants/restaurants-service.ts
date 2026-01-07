@@ -190,8 +190,9 @@ export const getRestaurantOfferByIdService = async (offerId: string, res: Respon
 	if (!offerId) {
 		return errorResponseHandler("Offer ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const restaurantOffer = await RestaurantOffersModel.findById(offerId).populate("restaurantId");
 
+	const restaurantOffer = await RestaurantOffersModel.findById(offerId).populate("restaurantId");
+    const isOfferAssigned = await offersHistoryModel.countDocuments({ offerId: offerId });
 	if (!restaurantOffer) {
 		return errorResponseHandler("Restaurant offer not found", httpStatusCode.NOT_FOUND, res);
 	}
@@ -200,6 +201,7 @@ export const getRestaurantOfferByIdService = async (offerId: string, res: Respon
 		success: true,
 		message: "Restaurant offer retrieved successfully",
 		data: restaurantOffer,
+		isOfferAssigned,
 	};
 };
 export const updateRestaurantOfferService = async (offerId: string, payload: any, res: Response) => {
