@@ -96,7 +96,7 @@ export const getUserByBarcodeService = async (barcode: string, req: any, res: Re
 	}
 	// const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
 	const offers: any = await getUserOfferHistoryForAdminService(user?._id?.toString(), req, res);
-	const coupons: any = await getUserCouponHistoryforAdminService(user?._id?.toString(), req, res);
+	const coupons: any = await getUserCouponHistoryService(user?._id?.toString(), res);
 
 	return {
 		success: true,
