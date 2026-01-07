@@ -15,7 +15,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createEposNowService } from "../epos/epos-service";
 import { getUserAchievementHistoryService } from "../achievements-history/achievements-history-service";
 import { getUserOfferHistoryForAdminService, getUserOfferHistoryForUserService, getUserOfferHistoryService } from "../offers-history/offers-history-service";
-import { getUserCouponHistoryforAdminService, getUserCouponHistoryService, getUserRedeemCouponHistoryService } from "../coupons-history/coupons-history-service";
+import { getUserCouponForAdminHistoryService, getUserCouponHistoryforAdminService, getUserCouponHistoryService, getUserRedeemCouponHistoryService } from "../coupons-history/coupons-history-service";
 import { couponsHistoryModel } from "../../models/coupons-history/coupons-history-schema";
 import { couponsModel } from "../../models/coupons/coupons-schema";
 import { getUserVisitsService } from "../achievements/achievements-service";
@@ -96,7 +96,7 @@ export const getUserByBarcodeService = async (barcode: string, req: any, res: Re
 	}
 	// const achievements: any = await getUserAchievementHistoryService(user?._id?.toString(), res);
 	const offers: any = await getUserOfferHistoryForAdminService(user?._id?.toString(), req, res);
-	const coupons: any = await getUserCouponHistoryService(user?._id?.toString(), res);
+	const coupons: any = await getUserCouponForAdminHistoryService(user?._id?.toString(),req, res);
 
 	return {
 		success: true,

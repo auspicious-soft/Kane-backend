@@ -259,6 +259,118 @@ export const getUserRedeemCouponHistoryService = async (
   };
 };
 
+
+export const getUserCouponForAdminHistoryService = async (
+  user: any,
+  payload: any,
+  res: Response
+) => {
+  if (!user) {
+    return errorResponseHandler(
+      "User ID is required",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
+  }
+
+  const page = Number(payload.page) > 0 ? Number(payload.page) : 1;
+  const limit = Number(payload.limit) > 0 ? Number(payload.limit) : 10;
+  const skip = (page - 1) * limit;
+
+  const now = new Date();
+
+  // Step 1: Fetch all coupon history
+  const history = await couponsHistoryModel
+    .find({ userId: user})
+    .populate("couponId")
+    .lean();
+
+  if (!history || history.length === 0) {
+    return {
+      success: true,
+      message: "No coupon history found for this user",
+      data: {
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+        data: [],
+      },
+    };
+  }
+
+  // Step 2: Fetch redeemed coupons
+  const redeemHistory = history.filter(
+    (entry: any) => entry.type === "redeem"
+  );
+
+  // Step 3: Extract redeemed coupon IDs
+  const redeemedCouponIds = new Set(
+    redeemHistory.map((entry: any) => String(entry?.couponId?._id))
+  );
+
+  // Step 4: Earned (non-redeemed, scratched, NOT expired)
+  const earnHistory = history.filter((entry: any) => {
+    const expiryDate = entry?.couponId?.expiry
+      ? new Date(entry.couponId.expiryDate)
+      : null;
+
+    const isExpired = expiryDate ? expiryDate < now : false;
+
+    return (
+      entry.type === "earn" &&
+      entry.isScratched === true &&
+      !isExpired &&
+      !redeemedCouponIds.has(String(entry?.couponId?._id))
+    );
+  });
+
+  // Step 5: Expired coupons (type earn only)
+  const expiryHistory = history.filter((entry: any) => {
+    const expiryDate = entry?.couponId?.expiry
+      ? new Date(entry?.couponId?.expiry)
+      : null;
+
+    return (
+      entry.type === "earn" &&
+      expiryDate &&
+      expiryDate < now
+    );
+  });
+
+  // Step 6: Select data based on payload.type
+  let selectedHistory: any[] = [];
+
+  switch (payload.type) {
+    // case "redeem":
+    //   selectedHistory = redeemHistory;
+    //   break;
+
+    // case "expiry":
+    //   selectedHistory = expiryHistory;
+    //   break;
+
+    default: // earn
+      selectedHistory = earnHistory;
+      break;
+  }
+
+  const total = selectedHistory.length;
+  const paginatedHistory = selectedHistory.slice(skip, skip + limit);
+
+  return {
+    success: true,
+    message: "User coupon history retrieved successfully",
+    data: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data: paginatedHistory,
+    },
+  };
+};
+
 // export const getUserRedeemCouponHistoryService = async (
 //   user: any,
 //   payload: any,
