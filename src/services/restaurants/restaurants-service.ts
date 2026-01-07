@@ -100,7 +100,7 @@ export const getAllRestaurantService = async (payload: any, res: Response) => {
         },
     };
 };
-export const getRestaurantByIdService = async (restaurantId: any, res: Response) => {
+export const getRestaurantByIdService = async (restaurantId: any,payload:any, res: Response) => {
 	if (!restaurantId) {
 		return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
@@ -109,7 +109,12 @@ export const getRestaurantByIdService = async (restaurantId: any, res: Response)
 	if (!restaurant) {
 		return errorResponseHandler("Restaurant not found", httpStatusCode.NOT_FOUND, res);
 	}
-	const offers = await RestaurantOffersModel.find({ restaurantId }).lean();
+	let offers;
+	if(payload.isActive === "true"){
+		offers = await RestaurantOffersModel.find({ restaurantId, isActive: true }).lean();
+	}else{
+		 offers = await RestaurantOffersModel.find({ restaurantId }).lean();
+	}
 
   // Add isOfferAssigned to each offer
   const offersWithAssignmentFlag = await Promise.all(

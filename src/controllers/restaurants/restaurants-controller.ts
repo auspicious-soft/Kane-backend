@@ -53,7 +53,7 @@ export const getAllRestaurantOfferForUser = async (req: Request, res: Response) 
 // Get Restaurant by ID
 export const getRestaurantById = async (req: Request, res: Response) => {
   try {
-    const response = await getRestaurantByIdService(req.params.id, res);
+    const response = await getRestaurantByIdService(req.params.id,req.query, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
