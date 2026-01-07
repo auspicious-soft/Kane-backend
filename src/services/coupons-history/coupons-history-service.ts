@@ -98,21 +98,56 @@ export const deleteCouponHistoryService = async (historyId: string, res: Respons
 	};
 };
 export const getUserCouponHistoryService = async (userId: string, res: Response) => {
-	if (!userId) {
-		return errorResponseHandler("User ID is required", httpStatusCode.BAD_REQUEST, res);
-	}
-	const userCouponHistory = await couponsHistoryModel.find({ userId, type: "earn" }).populate("couponId");
+  if (!userId) {
+    return errorResponseHandler(
+      "User ID is required",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
+  }
+  // Step 1: Fetch all coupon history for user
+  const history = await couponsHistoryModel
+    .find({ userId: userId })
+    .populate("couponId")
+    .lean();
 
-	if (!userCouponHistory) {
-		return errorResponseHandler("No coupon history found for this user", httpStatusCode.NOT_FOUND, res);
-	}
+  if (!history || history.length === 0) {
+    return {
+      success: true,
+      message: "No coupon history found for this user",
+      data: [],
+    };
+  }
 
-	return {
-		success: true,
-		message: "User coupon history retrieved successfully",
-		data: userCouponHistory,
-	};
+  // Step 2: Fetch all redeemed coupons
+  const redeemHistory = await couponsHistoryModel
+    .find({ userId: userId, type: "redeem" })
+    .populate("couponId")
+    .lean();
+
+  // Step 3: Extract redeemed coupon IDs
+  const redeemedCouponIds = new Set(
+    redeemHistory.map((entry: any) => String(entry?.couponId?._id))
+  );
+
+  // Step 4: Filter earned coupons (scratched & not redeemed)
+  const filteredEarnHistory = history.filter(
+    (entry: any) =>
+      entry?.type === "earn" &&
+      entry?.isScratched === true &&
+      !redeemedCouponIds.has(String(entry?.couponId?._id))
+  );
+
+  // Step 5: Return based on type
+  const responseData = filteredEarnHistory;
+
+  return {
+    success: true,
+    message: "User coupon history retrieved successfully",
+    data: responseData,
+  };
 };
+
 // export const getUserRedeemCouponHistoryService = async (user: any, payload: any, res: Response) => {
 // 	const page = parseInt(payload.page as string) || 1;
 // 	const limit = parseInt(payload.limit as string) || 10;

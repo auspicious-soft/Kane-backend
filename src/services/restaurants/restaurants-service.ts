@@ -5,6 +5,7 @@ import { httpStatusCode } from "../../lib/constant";
 import { RestaurantsModel } from "../../models/restaurants/restaurants-schema";
 import { RestaurantOffersModel } from "../../models/restaurant-offers/restaurant-offers-schema";
 import { queryBuilder } from "../../utils";
+import { offersHistoryModel } from "../../models/offers-history/offers-history-schema";
 
 export const createRestaurantService = async (payload: any, res: Response) => {
 	const { restaurantDetails, restaurantOffers } = payload;
@@ -205,11 +206,11 @@ export const updateRestaurantOfferService = async (offerId: string, payload: any
 	if (!offerId) {
 		return errorResponseHandler("Offer ID is required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const { restaurantId, offerName, image, description, visits, redeemInStore, unlockRewards } = payload;
+	// const { restaurantId, offerName, image, description, visits, redeemInStore, unlockRewards,status } = payload;
 	// if (!offerName || !description || !visits || !redeemInStore || !unlockRewards) {
 	//   return errorResponseHandler("All offer fields are required", httpStatusCode.BAD_REQUEST, res);
 	// }
-	const updatedOffer = await RestaurantOffersModel.findByIdAndUpdate(offerId, { restaurantId, offerName, image, description, visits, redeemInStore, unlockRewards }, { new: true });
+	const updatedOffer = await RestaurantOffersModel.findByIdAndUpdate(offerId, { $set: payload }, { new: true });
 
 	if (!updatedOffer) {
 		return errorResponseHandler("Restaurant offer not found", httpStatusCode.NOT_FOUND, res);
@@ -219,6 +220,27 @@ export const updateRestaurantOfferService = async (offerId: string, payload: any
 		success: true,
 		message: "Restaurant offer updated successfully",
 		data: updatedOffer,
+	};
+};
+export const deleteRestaurantOfferService = async (offerId: string, res: Response) => {
+	if (!offerId) {
+		return errorResponseHandler("Offer ID is required", httpStatusCode.BAD_REQUEST, res);
+	}
+	const isOfferAssigned = await offersHistoryModel.countDocuments({ offerId: offerId });
+    if(isOfferAssigned > 0){
+		return errorResponseHandler("This offer is already assigned to a users.", httpStatusCode.BAD_REQUEST, res);
+	}
+
+	const deletedOffer = await RestaurantOffersModel.findByIdAndDelete(offerId);
+
+	if (!deletedOffer) {
+		return errorResponseHandler("Restaurant offer not found", httpStatusCode.NOT_FOUND, res);
+	}
+
+
+	return {
+		success: true,
+		message: "Restaurant offer deleted successfully",
 	};
 };
 

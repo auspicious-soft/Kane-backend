@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
-import { createRestaurantOfferService, createRestaurantService, deleteRestaurantService, getAllRestaurantOfferForUserService, getAllRestaurantOffersService, getAllRestaurantService, getAllRestaurantWithSearchService, getRestaurantByIdService, getRestaurantOfferByIdService, updateRestaurantOfferService, updateRestaurantService } from "../../services/restaurants/restaurants-service";
+import { createRestaurantOfferService, createRestaurantService, deleteRestaurantOfferService, deleteRestaurantService, getAllRestaurantOfferForUserService, getAllRestaurantOffersService, getAllRestaurantService, getAllRestaurantWithSearchService, getRestaurantByIdService, getRestaurantOfferByIdService, updateRestaurantOfferService, updateRestaurantService } from "../../services/restaurants/restaurants-service";
 
 // User Signup
 export const createRestaurant = async (req: Request, res: Response) => {
@@ -125,6 +125,17 @@ export const getRestaurantOfferById = async (req: Request, res: Response) => {
 export const updateRestaurantOffer = async (req: Request, res: Response) => {
   try {
     const response = await updateRestaurantOfferService(req.params.id, req.body, res);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res
+      .status(code || httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: message || "An error occurred" });
+  }
+};
+export const deleteRestaurantOffer = async (req: Request, res: Response) => {
+  try {
+    const response = await deleteRestaurantOfferService(req.params.id, res);
     return res.status(httpStatusCode.OK).json(response);
   } catch (error: any) {
     const { code, message } = errorParser(error);
