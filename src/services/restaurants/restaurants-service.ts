@@ -201,7 +201,7 @@ export const getRestaurantOfferByIdService = async (offerId: string, res: Respon
 		success: true,
 		message: "Restaurant offer retrieved successfully",
 		data: restaurantOffer,
-		isOfferAssigned,
+		isOfferAssigned: isOfferAssigned > 0?true:false,
 	};
 };
 export const updateRestaurantOfferService = async (offerId: string, payload: any, res: Response) => {
