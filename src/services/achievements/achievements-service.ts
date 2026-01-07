@@ -155,7 +155,7 @@ export const getAchievementsByRestaurantIdService = async (userData: any, restau
   if (!restaurantId) {
     return errorResponseHandler("Restaurant ID is required", httpStatusCode.BAD_REQUEST, res);
   }
-  let restaurant = await RestaurantOffersModel.find({ restaurantId: restaurantId }).populate("restaurantId").sort({createdAt:-1});
+  let restaurant = await RestaurantOffersModel.find({ restaurantId: restaurantId, status:"active" }).populate("restaurantId").sort({createdAt:-1});
   const collectedStamps = await offersHistoryModel.find({ userId: userData.id }).sort({createdAt:1});
   if (collectedStamps.length !== 0) {
     const stampIds = collectedStamps.map(stamp => stamp.offerId.toString());
