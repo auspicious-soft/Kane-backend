@@ -109,11 +109,27 @@ export const getRestaurantByIdService = async (restaurantId: any, res: Response)
 	if (!restaurant) {
 		return errorResponseHandler("Restaurant not found", httpStatusCode.NOT_FOUND, res);
 	}
-	const offers = await RestaurantOffersModel.find({ restaurantId: restaurantId });
+	const offers = await RestaurantOffersModel.find({ restaurantId }).lean();
+
+  // Add isOfferAssigned to each offer
+  const offersWithAssignmentFlag = await Promise.all(
+    offers.map(async (offer: any) => {
+      const isOfferAssigned =
+        (await offersHistoryModel.countDocuments({
+          offerId: offer._id,
+        })) > 0;
+
+      return {
+        ...offer,
+        isOfferAssigned,
+      };
+    })
+  );
+
 	return {
 		success: true,
 		message: "Restaurant retrieved successfully",
-		data: { restaurant, offers },
+		data: { restaurant, offers:offersWithAssignmentFlag },
 	};
 };
 export const updateRestaurantService = async (restaurantId: string, payload: any, res: Response) => {
@@ -192,7 +208,7 @@ export const getRestaurantOfferByIdService = async (offerId: string, res: Respon
 	}
 
 	const restaurantOffer = await RestaurantOffersModel.findById(offerId).populate("restaurantId");
-    const isOfferAssigned = await offersHistoryModel.countDocuments({ offerId: offerId });
+    // const isOfferAssigned = await offersHistoryModel.countDocuments({ offerId: offerId });
 	if (!restaurantOffer) {
 		return errorResponseHandler("Restaurant offer not found", httpStatusCode.NOT_FOUND, res);
 	}
@@ -201,7 +217,7 @@ export const getRestaurantOfferByIdService = async (offerId: string, res: Respon
 		success: true,
 		message: "Restaurant offer retrieved successfully",
 		data: restaurantOffer,
-		isOfferAssigned: isOfferAssigned > 0?true:false,
+		// isOfferAssigned: isOfferAssigned > 0?true:false,
 	};
 };
 export const updateRestaurantOfferService = async (offerId: string, payload: any, res: Response) => {
