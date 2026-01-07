@@ -387,7 +387,7 @@ export const homePageService = async (userDetails: any, payload: any, res: Respo
 	if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
 
 	const popularRestaurants = await RestaurantsModel.find({ isDeleted: false }).limit(10);
-	const offersAvailable = await RestaurantOffersModel.find().limit(10).populate("restaurantId");
+	const offersAvailable = await RestaurantOffersModel.find({isActive: true}).limit(10).populate("restaurantId");
     const readNotificationCount = await notificationsModel.find({ userIds: user._id, isRead: false }).countDocuments();
 	return {
 		success: true,

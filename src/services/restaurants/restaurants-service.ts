@@ -303,11 +303,11 @@ export const getAllRestaurantOfferForUserService = async (payload: any, res: Res
 	let totalRestaurants;
 	let restaurantOffers;
 	if (payload.id) {
-		totalRestaurants = await RestaurantOffersModel.countDocuments({ restaurantId: payload.id });
-		restaurantOffers = await RestaurantOffersModel.find({ restaurantId: payload.id }).sort().skip(offset).limit(limit).select("visits image description offerName _id").populate("restaurantId");
+		totalRestaurants = await RestaurantOffersModel.countDocuments({ restaurantId: payload.id ,isActive: true});
+		restaurantOffers = await RestaurantOffersModel.find({ restaurantId: payload.id,isActive: true }).sort().skip(offset).limit(limit).select("visits image description offerName _id").populate("restaurantId");
 	} else {
-		totalRestaurants = await RestaurantOffersModel.countDocuments();
-		restaurantOffers = await RestaurantOffersModel.find().sort().skip(offset).limit(limit).select("visits image description offerName _id").populate("restaurantId");
+		totalRestaurants = await RestaurantOffersModel.countDocuments({isActive: true});
+		restaurantOffers = await RestaurantOffersModel.find({isActive: true}).sort().skip(offset).limit(limit).select("visits image description offerName _id").populate("restaurantId");
 	}
 	return {
 		success: true,
