@@ -373,7 +373,7 @@ export const logoutService = async (userId: any, res: Response) => {
 	};
 };
 export const verifyReferralCodeService = async (payload: any, res: Response) => {
-	const validReferralCode = await usersModel.findOne({ referralCode: payload.referralCode });
+	const validReferralCode = await usersModel.findOne({ referralCode: payload.referralCode,isDeleted:false });
 	if (!validReferralCode) {
 		return errorResponseHandler("Invalid Referral Code", httpStatusCode.BAD_REQUEST, res);
 	}
