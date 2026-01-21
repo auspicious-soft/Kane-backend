@@ -87,7 +87,7 @@ app.post("/webhook/receive", (req, res) => {
 });
 
 app.get("/api/user/settings", getSettings);
-app.use("/api/admin", checkValidAdminRole, admin);
+app.use("/api/admin", checkValidAdminRole,checkAuth, admin);
 app.use("/api/user", checkAuth, user);
 app.post("/api/notifications", sendNotificationToUser);
 app.use("/api/epos", epos);

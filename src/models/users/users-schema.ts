@@ -96,7 +96,7 @@ const userSchema = new mongoose.Schema(
 		},
 		currency: {
 			type: String,
-			default: "$",
+			default: "£",
 		},
 		valuePerPoint: {
 			type: Number,
