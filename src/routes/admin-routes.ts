@@ -8,6 +8,7 @@ import { createCoupons, deleteCoupons, getAllCoupons, getCouponsById, updateCoup
 import { getUserOfferHistory, postApplyUserOffer } from "../controllers/offers-history/offers-history-controller";
 import { getUserCouponHistory, postApplyUserCoupon, updateCouponHistory } from "../controllers/coupons-history/coupons-history-controller";
 import { getUserAchievementHistory, postApplyUserAchievements } from "../controllers/achievements-history/achievements-history-controller";
+import { createPointsHistory } from "../controllers/points-history/points-history-controller";
 
 const router = Router();
 //restaurants ROUTES
@@ -37,6 +38,7 @@ router.get("/achievements", getAllAchievements);
 router.get("/achievements/:id", getAchievementById);
 router.put("/achievements/:id", updateAchievement);
 router.delete("/achievements/:id", deleteAchievement);
+router.post("/points-history", createPointsHistory);
 
 //coupons ROUTES
 router.post("/coupons", createCoupons);
