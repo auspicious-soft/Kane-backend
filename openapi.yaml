@@ -447,6 +447,8 @@ paths:
       description: Retrieve all restaurants for admin
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: List of all restaurants
@@ -492,6 +494,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Restaurant details
@@ -554,6 +557,8 @@ paths:
       description: Retrieve all restaurant offers for admin
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: List of all restaurant offers
@@ -599,6 +604,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Restaurant offer details
@@ -755,6 +761,8 @@ paths:
       description: Retrieve all achievements for admin
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: List of all achievements
@@ -800,6 +808,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Achievement details
@@ -906,6 +915,8 @@ paths:
       description: Retrieve all coupons
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: List of all coupons
@@ -951,6 +962,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Coupon details
@@ -1052,6 +1064,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Offer history details
@@ -1064,6 +1077,8 @@ paths:
       description: Apply an offer to a user
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       requestBody:
         required: true
         content:
@@ -1128,6 +1143,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Coupon history details
@@ -1166,6 +1182,8 @@ paths:
       description: Apply a coupon to a specific user
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       requestBody:
         required: true
         content:
@@ -1312,6 +1330,8 @@ paths:
       description: Retrieve all users for admin
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: List of all users
@@ -1336,6 +1356,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: User details
@@ -1358,6 +1379,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: User history details
@@ -1370,6 +1392,8 @@ paths:
       description: Retrieve list of blocked users
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: List of blocked users
@@ -1388,6 +1412,8 @@ paths:
       description: Block or unblock a user
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       requestBody:
         required: true
         content:
@@ -1429,6 +1455,8 @@ paths:
       description: Retrieve application settings
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Application settings
@@ -1467,6 +1495,8 @@ paths:
       description: Retrieve dashboard statistics and data for admin
       security:
         - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Dashboard data including statistics
@@ -1485,6 +1515,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: User details
@@ -1504,6 +1535,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/AdminRoleHeader'
       responses:
         '200':
           description: Achievement history details
@@ -1606,6 +1638,17 @@ paths:
           description: Customer not found
 
 components:
+
+  parameters:
+    AdminRoleHeader:
+      name: role
+      in: header
+      required: true
+      description: Must be admin to access admin APIs
+      schema:
+        type: string
+        enum: [admin]
+
   securitySchemes:
     BearerAuth:
       type: http
