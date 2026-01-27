@@ -3,7 +3,7 @@ import {  changePassword, deleteUser, getAllSpinPrizesList, getAllUsers, getCurr
 import {  getAllRestaurantForUser, getAllRestaurantOfferForUser, getRestaurantOfferById } from "../controllers/restaurants/restaurants-controller";
 import { logout } from "../controllers/auth/auth-controller";
 import { collectAchievement, createOfferHistory, getUserOfferHistoryForUser } from "../controllers/offers-history/offers-history-controller";
-import { createPointsHistory } from "../controllers/points-history/points-history-controller";
+// import { createPointsHistory } from "../controllers/points-history/points-history-controller";
 import { createCouponsHistory, getUserEarnedCouponHistory, getUserRedeemCouponHistory, updateCouponStatus } from "../controllers/coupons-history/coupons-history-controller";
 import { getAchievementsByRestaurantId, getAllRestaurantAchievements, getUserStampsByRestaurantId, getUserVisits } from "../controllers/achievements/achievements-controller";
 import { updateCouponStatusService } from "../services/coupons-history/coupons-history-service";
@@ -24,7 +24,7 @@ router.get("/offer-history", getUserOfferHistoryForUser);
 router.post("/coupon-history", createCouponsHistory);
 router.get("/coupon-history", getUserRedeemCouponHistory);
 router.get("/visit-history", getUserVisits);
-router.post("/points-history", createPointsHistory);
+// router.post("/points-history", createPointsHistory);
 router.get("/user-history", getUserHistoryForUser);
 
 
