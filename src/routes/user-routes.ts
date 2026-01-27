@@ -24,6 +24,7 @@ router.get("/offer-history", getUserOfferHistoryForUser);
 router.post("/coupon-history", createCouponsHistory);
 router.get("/coupon-history", getUserRedeemCouponHistory);
 router.get("/visit-history", getUserVisits);
+router.post("/points-history", createPointsHistory);
 router.get("/user-history", getUserHistoryForUser);
 
 
