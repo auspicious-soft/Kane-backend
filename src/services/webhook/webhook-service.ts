@@ -197,7 +197,6 @@ export const webhookService = {
 					}
 				}
 				break;
-
 			default:
 				console.log(`Unhandled EventTypeId: ${eventTypeId}`);
 		}
