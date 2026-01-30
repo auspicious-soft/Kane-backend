@@ -71,7 +71,7 @@ export const webhookService = {
 
 				// Fetch transaction details
 				const transaction: any = await eposNowService.getDataById("Transaction", payload.TransactionID, "v4");
-				console.log("transaction: ", transaction);
+				console.log("transaction-----: ", transaction);
 				if (!transaction) {
 					console.error(`Transaction with ID ${payload.TransactionID} not found.`);
 					return { status: "error", message: "Transaction not found" };
@@ -79,14 +79,12 @@ export const webhookService = {
 
 				const eposId = transaction.CustomerId;
 				const StaffId = transaction.StaffId;
-				console.log("StaffId: ", StaffId);
 				const user = await usersModel.findOne({ eposId });
 				if (!user) {
 					console.error(`Customer with EposId ${eposId} not found.`);
 					return { status: "error", message: "Customer not found" };
 				}
 
-				console.log("transaction: ", transaction);
 
 				const deviceData = await eposNowService.getDataById("Device", transaction.DeviceId, "V2");
 				console.log("deviceData: ", deviceData);
@@ -119,7 +117,8 @@ export const webhookService = {
 						currentVisitStreak: 1,
 					});
 				}
-				if(transaction.Total >= 20 && user.spin < 3){
+				if(transaction.TotalAmount >= 20 && user.spin < 3){
+					
 					user.spin += 1;
 				}
 
@@ -165,7 +164,6 @@ export const webhookService = {
 				// ------------------- ITEM LEVEL DISCOUNT -------------------
 				if (transaction.TransactionItems && transaction.TransactionItems.length > 0) {
 					for (const item of transaction.TransactionItems) {
-						console.log(" transaction.TransactionItems: ", transaction.TransactionItems);
 						if (item.DiscountReasonId && item.DiscountAmount > 0) {
 							console.log("item.DiscountAmount: ", item.DiscountAmount);
 							const discountReason = await eposNowService.getDataById("DiscountReason", item.DiscountReasonId, "v4");
