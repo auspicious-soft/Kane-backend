@@ -11,7 +11,9 @@ cron.schedule("5 0 * * *", async () => {
     await usersModel.updateMany(
       {
         isDeleted: false,
-        isBlocked: false
+        isBlocked: false,
+        spin: { $lt: 3 },
+
       },
       {
         $inc: { spin: 1 }
