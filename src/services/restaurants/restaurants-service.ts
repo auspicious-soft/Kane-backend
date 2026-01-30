@@ -12,13 +12,14 @@ export const createRestaurantService = async (payload: any, res: Response) => {
 	if (!restaurantDetails) {
 		return errorResponseHandler("Restaurant details are required", httpStatusCode.BAD_REQUEST, res);
 	}
-	const { restaurantName, image } = restaurantDetails;
+	const { restaurantName, image, eposLocationId } = restaurantDetails;
 	if (!restaurantName) {
 		return errorResponseHandler("Restaurant name is required", httpStatusCode.BAD_REQUEST, res);
 	}
 	const restaurant = await RestaurantsModel.create({
 		restaurantName,
 		image,
+		eposLocationId,
 	});
 
 	if (restaurantOffers && restaurantOffers.length > 0) {
