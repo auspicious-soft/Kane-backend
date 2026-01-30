@@ -119,7 +119,7 @@ export const webhookService = {
 						currentVisitStreak: 1,
 					});
 				}
-				if(transaction.Total >= 20){
+				if(transaction.Total >= 20 && user.spin < 3){
 					user.spin += 1;
 				}
 
