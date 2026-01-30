@@ -119,6 +119,7 @@ export const webhookService = {
 						currentVisitStreak: 1,
 					});
 				}
+				user.spin += 1;
 
 				await user.save();
 

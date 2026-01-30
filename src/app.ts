@@ -13,7 +13,7 @@ import { forgotPassword, login, logout, newPassswordAfterOTPVerified, resendOtp,
 import { getSettings } from "./controllers/settings/settings-controller";
 import { Error } from "mongoose";
 import { createEposNowService } from "./services/epos/epos-service";
-import "../src/crons/freeSpin.cron"
+// import "../src/crons/freeSpin.cron"
 import { webhookService } from "./services/webhook/webhook-service";
 import { initializeFirebase } from "./utils/FCM/FCM";
 import { sendNotificationToUser } from "./controllers/notifications/notifications-controller";
